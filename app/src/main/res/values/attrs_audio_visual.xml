@@ -1,0 +1,6 @@
+<resources>
+    <declare-styleable name="AudioVisual">
+        <attr name="lineWidth" format="integer" />
+        <attr name="lineColor" format="color" />
+    </declare-styleable>
+</resources>
