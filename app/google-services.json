@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "24779186807",
+    "firebase_url": "https://cloud4form.firebaseio.com",
+    "project_id": "cloud4form",
+    "storage_bucket": "cloud4form.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:24779186807:android:7f3385d593b63c75",
+        "android_client_info": {
+          "package_name": "com.cloud4form.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "24779186807-5mbt4jipbrhsodthfk6082p8un1ve07f.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "24779186807-bp5fqf82vsmksfqkpimu0914s053od6m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDe4G2cEnHXwbTyhwtHwDJ4NJVhUKV8EE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
