@@ -1,4 +1,4 @@
-package com.cloud4form.app;
+package com.cloud4form.app.gms;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
@@ -11,7 +11,11 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.cloud4form.app.MainActivity;
+import com.cloud4form.app.R;
 import com.google.android.gms.gcm.GcmListenerService;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.iid.InstanceID;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -33,6 +37,9 @@ public class MyGcmListenerService extends GcmListenerService {
     // [START receive_message]
     @Override
     public void onMessageReceived(String from, Bundle data) {
+
+
+
         String message = data.getString("message");
         Log.d(TAG, "From: " + from);
         Log.d(TAG, "Message: " + message);

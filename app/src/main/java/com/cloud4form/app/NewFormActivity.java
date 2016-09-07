@@ -1,6 +1,7 @@
 package com.cloud4form.app;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,8 +11,12 @@ import android.webkit.GeolocationPermissions;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.Toast;
 
 import com.cloud4form.app.barcode.MyWebViewClient;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
+import java.io.IOException;
 
 public class NewFormActivity extends AppCompatActivity {
 
@@ -34,11 +39,34 @@ public class NewFormActivity extends AppCompatActivity {
         String token=util.PREFF.getString(getString(R.string.app_token),"");
         String domain=util.PREFF.getString(getString(R.string.app_tenant),"");
 
-        FloatingActionButton fabSend = (FloatingActionButton) findViewById(R.id.fab);
+        final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
+
+        FloatingActionButton fabSend = (FloatingActionButton) findViewById(R.id.fab123);
         fabSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                (new AsyncTask() {
+                    @Override
+                    protected String doInBackground(Object... params) {
+                        String msg = "";
+                        try {
+                            Bundle data = new Bundle();
+                            data.putString("my_message", "Hello World");
+                            data.putString("my_action", "SAY_HELLO");
+                            long num=Math.round(Math.random()*9999);
+                            gcm.send("24779186807@gcm.googleapis.com", ""+num, data);
+                            msg = "Sent message";
+                        } catch (IOException ex) {
+                            msg = "Error :" + ex.getMessage();
+                        }
+                        return msg;
+                    }
 
+                    @Override
+                    protected void onPostExecute(Object msg) {
+                        Toast.makeText(NewFormActivity.this,msg.toString(),Toast.LENGTH_LONG).show();
+                    }
+                }).execute();
             }
         });
 

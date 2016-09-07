@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.cloud4form.app">
+    package="com.cloud4form.app"
+    android:installLocation="internalOnly">
 
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -13,12 +14,16 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
 
     <permission
         android:name="com.cloud4form.app.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
 
     <uses-permission android:name="com.cloud4form.app.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
     <application
         android:name="android.support.multidex.MultiDexApplication"
@@ -40,37 +45,36 @@
         </receiver>
 
         <service
-            android:name=".MyGcmListenerService"
+            android:name=".gms.MyGcmListenerService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
             </intent-filter>
         </service>
-
         <service
-            android:name=".MyInstanceIDListenerService"
-            android:exported="false" >
+            android:name=".gms.MyInstanceIDListenerService"
+            android:exported="false">
             <intent-filter>
-                <action android:name="com.google.android.gms.iid.InstanceID"/>
+                <action android:name="com.google.android.gms.iid.InstanceID" />
             </intent-filter>
         </service>
-
         <service
-            android:name=".RegistrationIntentService"
-            android:exported="false"></service>
+            android:name=".gms.RegistrationIntentService"
+            android:exported="false" />
 
-
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".HomeActivity"
-            android:label="@string/title_activity_home"
-            android:theme="@style/AppTheme.NoActionBar" />
+        <!-- <activity -->
+        <!-- android:name=".HomeActivity" -->
+        <!-- android:label="@string/title_activity_home" -->
+        <!-- android:theme="@style/AppTheme.NoActionBar" /> -->
         <activity
             android:name=".LoginActivity"
             android:label="@string/title_activity_login" />
@@ -84,7 +88,12 @@
 
         <activity
             android:name=".NewFormActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".HomeActivitySlider" />
+        </activity>
+
         <activity
             android:name=".audio.AudioRecord"
             android:label="Audio Record"
@@ -108,8 +117,17 @@
             android:name=".FormDetailsActivity"
             android:label="@string/title_activity_form_details"
             android:theme="@style/AppTheme.NoActionBar" />
-
-
+        <activity
+            android:name=".HomeActivitySlider"
+            android:label="@string/title_activity_home"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".pages.SettingsActivity"
+            android:label="@string/title_activity_settings">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".HomeActivitySlider" />
+        </activity>
     </application>
 
 </manifest>

@@ -1,5 +1,7 @@
 package com.cloud4form.app;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -13,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -24,6 +27,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.cloud4form.app.barcode.JSONSync;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.iid.InstanceID;
 import com.itextpdf.text.pdf.PdfName;
 
 import org.json.JSONArray;
@@ -55,6 +60,7 @@ public class LoginActivity extends AppCompatActivity{
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private String gcm_token="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +93,16 @@ public class LoginActivity extends AppCompatActivity{
         mProgressView = findViewById(R.id.login_progress);
 
         util=Util.getInstance(this);
+
+
+        try{
+            InstanceID instanceID = InstanceID.getInstance(this);
+            gcm_token = instanceID.getToken(getString(R.string.gcm_defaultSenderId),GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
+
+            util.PREFF.edit().putString(getString(R.string.gcm_token),gcm_token).commit();
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
     }
 
 
@@ -265,6 +281,7 @@ public class LoginActivity extends AppCompatActivity{
 
                 JSONObject toSend=new JSONObject();
                 toSend.put("ENTRY_ID",entryId);
+                toSend.put("GCM_TOKEN",gcm_token);
                 toSend.put("USER",this.mEmail);
                 toSend.put("PASSWORD",this.mPassword);
 
@@ -317,5 +334,6 @@ public class LoginActivity extends AppCompatActivity{
             showProgress(false);
         }
     }
+
 }
 

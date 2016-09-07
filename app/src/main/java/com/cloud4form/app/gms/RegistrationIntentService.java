@@ -1,4 +1,4 @@
-package com.cloud4form.app;
+package com.cloud4form.app.gms;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.cloud4form.app.R;
 import com.google.android.gms.gcm.GcmPubSub;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
@@ -76,6 +77,7 @@ public class RegistrationIntentService extends IntentService {
      * @param token The new token.
      */
     private void sendRegistrationToServer(String token) {
+        Log.e("TOKEN",token);
         // Add custom implementation, as needed.
     }
 

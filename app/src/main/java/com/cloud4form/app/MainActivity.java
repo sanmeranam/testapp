@@ -15,8 +15,6 @@ import android.widget.TextView;
 
 import com.cloud4form.app.barcode.JSONSync;
 import com.cloud4form.app.barcode.SimpleScannerActivity;
-import com.cloud4form.app.sign.SignCapture;
-import com.cloud4form.app.sign.SingCaptureActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -76,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         } else {
-            Intent intent = new Intent(this, HomeActivity.class);
+            Intent intent = new Intent(this, HomeActivitySlider.class);
             startActivity(intent);
         }
 

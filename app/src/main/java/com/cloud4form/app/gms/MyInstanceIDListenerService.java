@@ -1,8 +1,6 @@
-package com.cloud4form.app;
+package com.cloud4form.app.gms;
 
-import android.app.Service;
 import android.content.Intent;
-import android.os.IBinder;
 
 import com.google.android.gms.iid.InstanceIDListenerService;
 
