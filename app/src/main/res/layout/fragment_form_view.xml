@@ -4,15 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#fff"
+    android:padding="10dp"
+    android:background="#ECEDEF"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".HomeActivitySlider">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clipToPadding="false"
+        android:layout_height="match_parent"
         android:scrollbars="vertical" />
 
 </RelativeLayout>

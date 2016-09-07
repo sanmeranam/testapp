@@ -1,13 +1,98 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:padding="20dp"
     tools:context="com.cloud4form.app.pages.AccountViewFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <com.cloud4form.app.other.RoundedImageView
+        android:layout_width="100dp"
+        android:layout_gravity="center_horizontal|top"
+        android:layout_height="100dp"
+        android:src="@drawable/user"
+        android:scaleType="fitXY"
+        android:id="@+id/NavviewImage" />
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_below="@+id/viewImage"
+        android:padding="20dp"
+        android:background="#fff"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="200dp">
 
-</FrameLayout>
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="User Name"
+            android:id="@+id/textViewName"
+
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="User Group"
+            android:id="@+id/textViewGroup"
+            android:layout_below="@+id/textViewName"
+            android:layout_centerHorizontal="true" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="email"
+            android:id="@+id/textViewEmail"
+            android:layout_below="@+id/textViewGroup"
+            android:layout_alignLeft="@+id/textViewGroup"
+            android:layout_alignStart="@+id/textViewGroup" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="00000000000"
+            android:id="@+id/textViewPhone"
+            android:layout_below="@+id/textViewEmail"
+            android:layout_alignLeft="@+id/textViewEmail"
+            android:layout_alignStart="@+id/textViewEmail" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Base.Widget.AppCompat.Button.Borderless"
+            android:id="@+id/buttonCallUser"
+            android:src="@drawable/ic_action_call"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Base.Widget.AppCompat.Button.Borderless"
+            android:id="@+id/buttonChatUser"
+            android:src="@drawable/ic_action_chat"
+            android:layout_alignTop="@+id/buttonCallUser"
+            android:layout_centerHorizontal="true" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Base.Widget.AppCompat.Button.Borderless"
+            android:id="@+id/buttonChangePhofileImage"
+            android:src="@drawable/ic_action_snap"
+            android:layout_alignTop="@+id/buttonChatUser"
+            android:layout_alignLeft="@+id/textViewEmail"
+            android:layout_alignStart="@+id/textViewEmail" />
+
+
+
+    </RelativeLayout>
+
+
+</android.support.design.widget.CoordinatorLayout>

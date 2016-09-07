@@ -3,6 +3,7 @@ package com.cloud4form.app;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 import com.cloud4form.app.audio.AudioRecord;
 import com.cloud4form.app.barcode.SimpleScannerActivity;
 import com.cloud4form.app.filescan.ScannerHomeActivity;
+import com.cloud4form.app.sign.SingCaptureActivity;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,7 +72,6 @@ public class NewFormWebInterface {
             }
 
             if (photoFile != null) {
-//                Uri photoURI = FileProvider.getUriForFile(this.mContext,"com.cloud4form.app.FileProvider",photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoFile.toURI());
                 ((Activity)this.mContext).startActivityForResult(takePictureIntent, reqId);
             }
@@ -89,6 +90,8 @@ public class NewFormWebInterface {
     @JavascriptInterface
     public void captureSign(int reqId,String callback) {
         this.reqMap.put(reqId,new ReqPacket(reqId,PTYPE.VIDEO,callback));
+        Intent intent = new Intent(this.mContext, SingCaptureActivity.class);
+        ((Activity)this.mContext).startActivityForResult(intent, reqId);
 
     }
 
@@ -119,6 +122,46 @@ public class NewFormWebInterface {
     @JavascriptInterface
     public void submitData(String data,String callback) {
 
+    }
+
+    @JavascriptInterface
+    public void readyDataToSend(boolean isEnable) {
+        ((NewFormActivity)this.mContext).sendEnableState(isEnable);
+    }
+
+    @JavascriptInterface
+    public void playAudio(String path,String callback) {
+        Intent intent = new Intent();
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        File file = new File(path);
+        intent.setDataAndType(Uri.fromFile(file), "audio/*");
+        ((Activity)this.mContext).startActivity(intent);
+    }
+
+    @JavascriptInterface
+    public void playVideo(String path) {
+        Intent intent = new Intent();
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        File file = new File(path);
+        intent.setDataAndType(Uri.fromFile(file), "video/*");
+        ((Activity)this.mContext).startActivity(intent);
+    }
+
+    @JavascriptInterface
+    public void showImage(String path) {
+        Intent intent = new Intent();
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        File file = new File(path);
+        intent.setDataAndType(Uri.fromFile(file), "image/*");
+        ((Activity)this.mContext).startActivity(intent);
+    }
+
+    @JavascriptInterface
+    public void openMap(String lat,String lng) {
+        String addr=lat+","+lng;
+
+        Intent intent = new Intent(android.content.Intent.ACTION_VIEW,Uri.parse("http://maps.google.com/maps?saddr="+addr+"&daddr="+addr));
+        ((Activity)this.mContext).startActivity(intent);
     }
 
 

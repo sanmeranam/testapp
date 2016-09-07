@@ -14,6 +14,7 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import com.cloud4form.app.barcode.MyWebViewClient;
+import com.cloud4form.app.other.FormMetaEntity;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
@@ -22,26 +23,32 @@ public class NewFormActivity extends AppCompatActivity {
 
     private  WebView mWebView;
     private NewFormWebInterface newFormWebInterface;
-    private HomeActivity.FormDetails formDetails;
+    private FormMetaEntity formDetails;
     private Util util;
-
+    private FloatingActionButton fabSend;
+    private String FORM_MODE=FormMetaEntity.ARG_MODE_NEW;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_view);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        formDetails= HomeActivity.FormDetails.parse(getIntent().getStringExtra("data"));
+
+        formDetails= FormMetaEntity.parse(getIntent().getStringExtra(FormMetaEntity.ARG_DATA));
+
         toolbar.setTitle(formDetails.formName.toUpperCase());
         setSupportActionBar(toolbar);
 
+        FORM_MODE=getIntent().getStringExtra(FormMetaEntity.ARG_MODE);
+
+
         util=Util.getInstance(this);
-        String token=util.PREFF.getString(getString(R.string.app_token),"");
-        String domain=util.PREFF.getString(getString(R.string.app_tenant),"");
+        String token=util.getPref(Util.PREE_SYNC_TOKEN);
+        String domain=util.getPref(Util.PREE_APP_TENANT);
 
         final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
 
-        FloatingActionButton fabSend = (FloatingActionButton) findViewById(R.id.fab123);
+        fabSend = (FloatingActionButton) findViewById(R.id.fab123);
         fabSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -77,7 +84,6 @@ public class NewFormActivity extends AppCompatActivity {
         webSettings.setAllowFileAccess(true);
         webSettings.setAppCacheEnabled(true);
         webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
-//        webSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         webSettings.setAppCacheEnabled(true);
         webSettings.setDomStorageEnabled(true);
         webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NARROW_COLUMNS);
@@ -88,7 +94,7 @@ public class NewFormActivity extends AppCompatActivity {
 
         this.newFormWebInterface =new NewFormWebInterface(this,mWebView);
 
-        mWebView.addJavascriptInterface(this.newFormWebInterface, "App");
+        mWebView.addJavascriptInterface(this.newFormWebInterface, "FC");
 
         mWebView.setWebChromeClient(new WebChromeClient() {
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
@@ -101,7 +107,7 @@ public class NewFormActivity extends AppCompatActivity {
         try{
             String sURL=util.AppConfig.getString("app_url")+util.AppConfig.getString("form_new").replace("{1}",domain);
 
-            sURL+="?_f="+formDetails.formId+"&_t="+token;
+            sURL+="?_f="+formDetails.formId+"&_t="+token+"&_m="+FORM_MODE;
 
             mWebView.loadUrl(sURL);
         }catch (Exception e){
@@ -109,9 +115,12 @@ public class NewFormActivity extends AppCompatActivity {
         }
     }
 
+    public void sendEnableState(boolean bState){
+        this.fabSend.setEnabled(bState);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         if(requestCode==RESULT_OK) {
             this.newFormWebInterface.onSuccessResultFromActivity(requestCode,data);
         }

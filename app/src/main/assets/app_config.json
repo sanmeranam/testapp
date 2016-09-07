@@ -1,11 +1,14 @@
 {
   "api_url":"http://api.cloud4form.com",
   "app_url":"http://app.cloud4form.com",
-  "tenant":"http://{1}.cloud4form.com",
+  "tenant":"http://{domain}.cloud4form.com",
   "sync_path":"/master/service/config/sync",
-  "from_path":"/{1}/service/config/forms",
-  "signin_path":"/{1}/service/config/singin",
-  "form_hist":"/{1}/",
-  "form_new":"/{1}/newform"
-
+  "from_path":"/{domain}/service/config/forms",
+  "signin_path":"/{domain}/service/config/singin",
+  "form_hist":"/{domain}/",
+  "form_new":"/{domain}/newform",
+  "cgm_token":"/{domain}/service/config/cgm_token",
+  "getprofile":"/{domain}/service/config/getprofile",
+  "setprofile":"/{domain}/service/config/setprofile",
+  "getallusers":"/{domain}/service/config/getallusers"
 }

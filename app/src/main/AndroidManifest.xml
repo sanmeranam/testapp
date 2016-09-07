@@ -88,12 +88,11 @@
 
         <activity
             android:name=".NewFormActivity"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".HomeActivitySlider" />
         </activity>
-
         <activity
             android:name=".audio.AudioRecord"
             android:label="Audio Record"
@@ -128,6 +127,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".HomeActivitySlider" />
         </activity>
+        <activity android:name=".pages.ChatActivity"></activity>
     </application>
 
 </manifest>

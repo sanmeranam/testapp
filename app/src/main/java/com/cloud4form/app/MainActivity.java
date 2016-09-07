@@ -13,7 +13,8 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.cloud4form.app.barcode.JSONSync;
+import com.cloud4form.app.other.GenericAsyncTask;
+import com.cloud4form.app.other.JSONSync;
 import com.cloud4form.app.barcode.SimpleScannerActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -29,11 +30,7 @@ public class MainActivity extends AppCompatActivity implements
     private ProgressBar _mProg;
     private Button _mScanButton;
     private TextView _mTextView;
-//    private LocationManager locationManager;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
+
     private GoogleApiClient client;
     Location mLastLocationLast;
 
@@ -63,8 +60,8 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onStart() {
 
-        String appConfig = util.PREFF.getString(getString(R.string.app_config), null);
-        String appToken = util.PREFF.getString(getString(R.string.app_token), null);
+        String appConfig = util.getPref(Util.PREE_APP_CONFIG);
+        String appToken = util.getPref(Util.PREE_SYNC_TOKEN);
 
         if (appConfig == null) {
             _mTextView.setVisibility(View.VISIBLE);
@@ -84,30 +81,33 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
-    private void onResultRemote(JSONObject data){
+    private void onResultRemote(JSONObject response){
+        String sErrorMsg="ERROR:Something went wrong. Try later.";
         try{
-            Log.v("RESULT", data.toString());
-            this._mProg.setVisibility(View.INVISIBLE);
-            if(data.has("error")){
-                this._mTextView.setText("ERROR:Something went wrong. Try later.");
+            if(response.has("success") && response.getInt("success")==1){
+                JSONObject oData=response.getJSONObject("data");
+                util.saveJSONData(oData,Util.PREE_APP_CONFIG);
+                util.setPref(Util.PREE_APP_TENANT,oData.getString("domain"));
+                util.setPref(Util.PREE_APP_WORK_MODE,Util.PREE_APP_WORK_MODE_ONLINE);
+
+                Intent loginPage=new Intent(MainActivity.this,LoginActivity.class);
+                startActivity(loginPage);
+
             }else{
-                util.PREFF.edit().putString(getString(R.string.app_config),data.toString()).commit();
-                Intent intent = new Intent(this, LoginActivity.class);
-                startActivity(intent);
+                this._mTextView.setText(sErrorMsg);
             }
         }catch (Exception ex){
-            this._mTextView.setText("ERROR:Something went wrong. Try later.");
+            this._mTextView.setText(sErrorMsg);
         }
     }
 
     private void getAppConfig(String scanId) {
         this._mProg.setVisibility(View.VISIBLE);
-        this._mTextView.setText("Sync in progress. Please wait...");
         this._mScanButton.setVisibility(View.INVISIBLE);
+        this._mTextView.setText("Sync in progress. Please wait...");
+
 
         try {
-            String url = util.AppConfig.getString("api_url");
-            String path = util.AppConfig.getString("sync_path");
 
             JSONObject dataToSend = new JSONObject();
             dataToSend.put("DEVICE_ID", this.util.getDeviceId());
@@ -122,8 +122,12 @@ public class MainActivity extends AppCompatActivity implements
                 dataToSend.put("LOCATION",loca);
             }
 
-
-            new BackGroundTask(url + path).execute(dataToSend);
+            new GenericAsyncTask(util.generateURL("api_url","sync_path"),new GenericAsyncTask.IAsyncCallback() {
+                @Override
+                public void onResult(JSONObject result) {
+                    onResultRemote(result);
+                }
+            }).execute(dataToSend);
         } catch (Exception ex) {
             Log.e("RESULT_ERROR", ex.getMessage());
         }
@@ -155,29 +159,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
-    }
-
-
-    private class BackGroundTask extends AsyncTask<JSONObject, String, JSONObject> {
-        private String url;
-
-        BackGroundTask(String url) {
-            this.url = url;
-        }
-
-        @Override
-        protected JSONObject doInBackground(JSONObject... params) {
-            JSONSync jsync = new JSONSync(MainActivity.this, null);
-            return (JSONObject) jsync.getJsonPost(this.url, params[0]);
-        }
-
-        protected void onProgressUpdate(Integer... progress) {
-
-        }
-
-        protected void onPostExecute(JSONObject result) {
-            onResultRemote(result);
-        }
     }
 
 

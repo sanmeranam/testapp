@@ -1,4 +1,4 @@
-package com.cloud4form.app.barcode;
+package com.cloud4form.app.other;
 
 import android.content.Context;
 
@@ -18,11 +18,10 @@ import java.util.Scanner;
  * Created by I326482 on 8/13/2016.
  */
 public class JSONSync {
-    private Context context;
+
     private String token;
-    public JSONSync(Context context,String token){
-        this.context=context;
-        this.token=token;
+    public JSONSync(String token){
+            this.token=token;
     }
 
     public JSONObject getJsonGet(String surl,String token){
@@ -56,7 +55,7 @@ public class JSONSync {
         }
     }
 
-    public Object getJsonPost(String surl,JSONObject data){
+    public JSONObject getJsonPost(String surl,JSONObject data){
         try{
             URL url=new URL(surl);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -80,22 +79,15 @@ public class JSONSync {
                 }
 
                 urlConnection.disconnect();
-                try{
-                    JSONObject obj = new JSONObject(stringBuilder.toString());
-                    return obj;
-                }catch (Exception e){}
-                try{
-                    JSONArray arr = new JSONArray(stringBuilder.toString());
-                    return arr;
-                }catch (Exception e){}
-                return null;
+                return new JSONObject(stringBuilder.toString());
             }else{
                 return null;
             }
 
         }catch (Exception ex){
-            return null;
+            ex.printStackTrace();
         }
+        return null;
     }
 
     public JSONObject getJsonPut(String surl,JSONObject data){

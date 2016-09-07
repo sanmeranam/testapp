@@ -22,13 +22,6 @@
     <string name="not_configured">You app is not sync with your tenant. Ask your administrator to share a QR Code to scan. App will configure automatically.</string>
 
 
-    <!-- Strings related to preference key -->
-    <string name="file_master">APP_KEY_CLOUD</string>
-    <string name="app_config">APP_CONFIG</string>
-    <string name="app_forms">APP_FORMS</string>
-    <string name="app_token">APP_TOKEN</string>
-    <string name="gcm_token">GCM_TOKEN</string>
-    <string name="app_tenant">APP_TENANT</string>
     <string name="title_activity_test">Test</string>
     <string name="action_settings">Settings</string>
     <string name="section_format">Hello World from section: %1$d</string>

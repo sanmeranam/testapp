@@ -4,7 +4,9 @@ import android.app.Fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.widget.PopupMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -85,6 +87,14 @@ public class ChatProfileFragment extends Fragment {
                     + " must implement OnFragmentInteractionListener");
         }
     }
+
+    public void showPopup(View v) {
+        PopupMenu popup = new PopupMenu(getActivity(), v);
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.profile_image_menu, popup.getMenu());
+        popup.show();
+    }
+
 
     @Override
     public void onDetach() {

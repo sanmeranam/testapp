@@ -1,7 +1,5 @@
 package com.cloud4form.app;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -11,11 +9,9 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -26,10 +22,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.cloud4form.app.barcode.JSONSync;
+import com.cloud4form.app.other.GenericAsyncTask;
+import com.cloud4form.app.other.JSONSync;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
-import com.itextpdf.text.pdf.PdfName;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -44,18 +40,6 @@ import static android.Manifest.permission.READ_CONTACTS;
 public class LoginActivity extends AppCompatActivity{
 
     private Util util;
-    /**
-     * Id to identity READ_CONTACTS permission request.
-     */
-    private static final int REQUEST_READ_CONTACTS = 0;
-
-
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
-
-    // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private View mProgressView;
@@ -95,40 +79,13 @@ public class LoginActivity extends AppCompatActivity{
         util=Util.getInstance(this);
 
 
-        try{
-            InstanceID instanceID = InstanceID.getInstance(this);
-            gcm_token = instanceID.getToken(getString(R.string.gcm_defaultSenderId),GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
 
-            util.PREFF.edit().putString(getString(R.string.gcm_token),gcm_token).commit();
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
     }
 
-
-    private boolean mayRequestContacts() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
-        if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
-                    });
-        } else {
-            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-        }
-        return false;
+    @Override
+    protected void onStart() {
+        super.onStart();
     }
-
-
 
     /**
      * Attempts to sign in or register the account specified by the login form.
@@ -136,11 +93,6 @@ public class LoginActivity extends AppCompatActivity{
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
-
-        // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
 
@@ -177,8 +129,8 @@ public class LoginActivity extends AppCompatActivity{
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+
+            initLoginProcess(email,password);
         }
     }
 
@@ -190,6 +142,52 @@ public class LoginActivity extends AppCompatActivity{
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
         return true;//password.length() > 4;
+    }
+
+
+    private void initLoginProcess(String email,String pass){
+        try {
+
+            JSONObject oConfig=util.getAsJSON(Util.PREE_APP_CONFIG);
+            String entryId=oConfig.getString("entryId");
+
+            JSONObject toSend=new JSONObject();
+            toSend.put("ENTRY_ID",entryId);
+            toSend.put("GCM_TOKEN",gcm_token);
+            toSend.put("USER",email);
+            toSend.put("PASSWORD",pass);
+
+            new GenericAsyncTask(util.generateURL("api_url","signin_path"), new GenericAsyncTask.IAsyncCallback() {
+                @Override
+                public void onResult(JSONObject response)throws Exception {
+
+                    showProgress(false);
+
+                    if(response.has("success") && response.getInt("success")==1){
+                        JSONObject oData=response.getJSONObject("data");
+
+                        if(oData.has("TOKEN")){
+                            util.setPref(Util.PREE_SYNC_TOKEN,oData.getString("TOKEN"));
+                        }
+
+                        if(oData.has("PROFILE")){
+                            util.saveJSONData(oData.getJSONObject("PROFILE"),Util.PREE_USER_PROFILE);
+                        }
+
+                        if(oData.has("FORM_META")){
+                            util.setPref(Util.PREE_APP_FORMS,oData.getJSONArray("FORM_META").toString());
+                        }
+                        AuthSuccess();
+                    }else{
+                        mPasswordView.setError(getString(R.string.error_incorrect_password));
+                        mPasswordView.requestFocus();
+                    }
+                }
+            }).execute(toSend);
+
+        }catch (Exception ex){
+
+        }
     }
 
     /**
@@ -228,112 +226,12 @@ public class LoginActivity extends AppCompatActivity{
         }
     }
 
-    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
-                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
-
-        mEmailView.setAdapter(adapter);
-    }
-
-
-    private interface ProfileQuery {
-        String[] PROJECTION = {
-                ContactsContract.CommonDataKinds.Email.ADDRESS,
-                ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
-        };
-
-        int ADDRESS = 0;
-        int IS_PRIMARY = 1;
-    }
 
     private void AuthSuccess(){
-        Intent intent = new Intent(this, HomeActivity.class);
+        Intent intent = new Intent(this, HomeActivitySlider.class);
         startActivity(intent);
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            try {
-                String url = util.AppConfig.getString("api_url");
-                String path = util.AppConfig.getString("signin_path");
-
-                String sConfig=util.PREFF.getString(getString(R.string.app_config),"{}");//.edit().putString(getString(R.string.app_config),data.toString()).commit();
-                JSONObject oConfig=new JSONObject(sConfig);
-                path=path.replace("{1}",oConfig.getString("domain"));
-
-                String entryId=oConfig.getString("entryId");
-
-                JSONObject toSend=new JSONObject();
-                toSend.put("ENTRY_ID",entryId);
-                toSend.put("GCM_TOKEN",gcm_token);
-                toSend.put("USER",this.mEmail);
-                toSend.put("PASSWORD",this.mPassword);
-
-
-                JSONSync jsync = new JSONSync(LoginActivity.this, null);
-                Object _ires=jsync.getJsonPost(url+path, toSend);
-                if(_ires!=null && _ires instanceof JSONObject){
-                    JSONObject res=(JSONObject)_ires;
-                    if(res.has("error")){
-                        return false;
-                    }else{
-                        util.PREFF.edit().putString(getString(R.string.app_forms),res.toString()).commit();
-                        util.PREFF.edit().putString(getString(R.string.app_token),entryId).commit();
-                        return true;
-                    }
-
-                }else if(_ires!=null && _ires instanceof JSONArray){
-                    JSONArray res=(JSONArray)_ires;
-                    util.PREFF.edit().putString(getString(R.string.app_forms),res.toString()).commit();
-                    util.PREFF.edit().putString(getString(R.string.app_token),entryId).commit();
-                    util.PREFF.edit().putString(getString(R.string.app_tenant),oConfig.getString("domain")).commit();
-                    return true;
-                }
-                return false;
-
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-
-
-            return false;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                AuthSuccess();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }
 
 }
 
