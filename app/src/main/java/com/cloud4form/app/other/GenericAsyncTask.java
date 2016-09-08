@@ -26,6 +26,7 @@ public class GenericAsyncTask extends AsyncTask<JSONObject,Void,JSONObject> {
          try {
              this.iAsyncCallback.onResult(jsonObject);
          }catch (Exception ex){
+             ex.printStackTrace();
          }
     }
 

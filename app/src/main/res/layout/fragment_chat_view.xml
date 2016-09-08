@@ -4,6 +4,8 @@
     android:layout_height="match_parent"
     tools:context="com.cloud4form.app.pages.ChatActivity">
 
+
+
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -28,17 +30,19 @@
             android:layout_height="match_parent"
             android:inputType="textMultiLine"
             android:ems="10"
-            android:id="@+id/editText"
+            android:id="@+id/textMessageInput"
             android:layout_weight="0.8" />
 
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             style="@style/Base.Widget.AppCompat.Button.Borderless"
-            android:id="@+id/imageButton"
+            android:id="@+id/buttonSend"
             android:src="@drawable/ic_menu_send"
             android:layout_weight="0.2" />
     </LinearLayout>
+
+
 
 
 </RelativeLayout>

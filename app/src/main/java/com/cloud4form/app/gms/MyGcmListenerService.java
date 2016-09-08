@@ -13,6 +13,7 @@ import android.util.Log;
 
 import com.cloud4form.app.MainActivity;
 import com.cloud4form.app.R;
+import com.cloud4form.app.Util;
 import com.google.android.gms.gcm.GcmListenerService;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
@@ -26,6 +27,12 @@ import com.google.android.gms.iid.InstanceID;
  */
 public class MyGcmListenerService extends GcmListenerService {
     private static final String TAG = "MyGcmListenerService";
+
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+    }
 
     /**
      * Called when message is received.
@@ -47,7 +54,8 @@ public class MyGcmListenerService extends GcmListenerService {
         if (from.startsWith("/topics/")) {
             // message received from some topic.
         } else {
-            // normal downstream message.
+            data.putString("from",from);
+            Util.doNotify(data);
         }
 
         // [START_EXCLUDE]
@@ -62,7 +70,7 @@ public class MyGcmListenerService extends GcmListenerService {
          * In some cases it may be useful to show a notification indicating to the user
          * that a message was received.
          */
-        sendNotification(message);
+//        sendNotification(message);
         // [END_EXCLUDE]
     }
     // [END receive_message]
@@ -87,9 +95,10 @@ public class MyGcmListenerService extends GcmListenerService {
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent);
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager =(NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        notificationManager.notify(0, notificationBuilder.build());
     }
+
+
 }

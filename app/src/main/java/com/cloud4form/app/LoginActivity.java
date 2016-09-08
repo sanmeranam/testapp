@@ -171,7 +171,11 @@ public class LoginActivity extends AppCompatActivity{
                         }
 
                         if(oData.has("PROFILE")){
-                            util.saveJSONData(oData.getJSONObject("PROFILE"),Util.PREE_USER_PROFILE);
+                            JSONObject prof=oData.getJSONObject("PROFILE");
+                            util.saveJSONData(prof,Util.PREE_USER_PROFILE);
+                            if(prof.has("cgm_token") && prof.getString("cgm_token").trim().length()!=0){
+                                util.setPref(Util.PREE_GCM_TOKEN,prof.getString("cgm_token"));
+                            }
                         }
 
                         if(oData.has("FORM_META")){

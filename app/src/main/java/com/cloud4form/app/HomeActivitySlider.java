@@ -81,13 +81,15 @@ public class HomeActivitySlider extends AppCompatActivity implements NavigationV
                 drawer.closeDrawer(GravityCompat.START);
             }
         });
+
+        switchFragment(FormViewFragment.newInstance());
+        setTitle("Home");
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        switchFragment(FormViewFragment.newInstance());
-        setTitle("Home");
+
 
         if(util.getPref(Util.PREE_APP_WORK_MODE).equals(util.getPref(Util.PREE_APP_WORK_MODE_OFFLINE))){
             return;
@@ -104,10 +106,11 @@ public class HomeActivitySlider extends AppCompatActivity implements NavigationV
         new AsyncTask<Void,Void,Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                if(util.checkGCMToken()){
+                String gToken=util.checkGCMToken();
+                if(gToken!=null && gToken.trim().length()>10){
                     try {
                         JSONObject req=new JSONObject();
-                        req.put("GCM_TOKEN",util.getPref(Util.PREE_GCM_TOKEN));
+                        req.put("GCM_TOKEN",gToken);
                         req.put("USER_ID",util.getAsJSON(Util.PREE_USER_PROFILE).getString("_id"));
 
                         JSONSync jsync = new JSONSync(null);
@@ -207,7 +210,7 @@ public class HomeActivitySlider extends AppCompatActivity implements NavigationV
                 setTitle("Home");
                 break;
             case R.id.nav_chat:
-                switchFragment(ChatProfileFragment.newInstance("",""));
+                switchFragment(ChatProfileFragment.newInstance());
                 setTitle("Message");
                 break;
             case R.id.nav_settings:

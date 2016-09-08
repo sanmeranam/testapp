@@ -55,6 +55,8 @@ public class FormViewFragment extends Fragment {
 
         JSONArray jForms=util.getAsJSONArray(Util.PREE_APP_FORMS);
         try {
+
+
             for(int i=0;i<jForms.length();i++){
                 formList.add(new FormMetaEntity(jForms.getJSONObject(i)));
             }

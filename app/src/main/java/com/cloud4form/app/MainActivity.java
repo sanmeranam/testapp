@@ -61,13 +61,13 @@ public class MainActivity extends AppCompatActivity implements
     protected void onStart() {
 
         String appConfig = util.getPref(Util.PREE_APP_CONFIG);
-        String appToken = util.getPref(Util.PREE_SYNC_TOKEN);
+        String appToken = util.getPref(Util.PREE_USER_PROFILE);
 
         if (appConfig == null) {
             _mTextView.setVisibility(View.VISIBLE);
             _mScanButton.setVisibility(View.VISIBLE);
             _mProg.setVisibility(View.INVISIBLE);
-        } else if (appToken == null) {
+        } else if (appToken == null || appToken.trim().length()==0) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         } else {

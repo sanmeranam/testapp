@@ -46,34 +46,13 @@ public class NewFormActivity extends AppCompatActivity {
         String token=util.getPref(Util.PREE_SYNC_TOKEN);
         String domain=util.getPref(Util.PREE_APP_TENANT);
 
-        final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
+
 
         fabSend = (FloatingActionButton) findViewById(R.id.fab123);
         fabSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                (new AsyncTask() {
-                    @Override
-                    protected String doInBackground(Object... params) {
-                        String msg = "";
-                        try {
-                            Bundle data = new Bundle();
-                            data.putString("my_message", "Hello World");
-                            data.putString("my_action", "SAY_HELLO");
-                            long num=Math.round(Math.random()*9999);
-                            gcm.send("24779186807@gcm.googleapis.com", ""+num, data);
-                            msg = "Sent message";
-                        } catch (IOException ex) {
-                            msg = "Error :" + ex.getMessage();
-                        }
-                        return msg;
-                    }
 
-                    @Override
-                    protected void onPostExecute(Object msg) {
-                        Toast.makeText(NewFormActivity.this,msg.toString(),Toast.LENGTH_LONG).show();
-                    }
-                }).execute();
             }
         });
 

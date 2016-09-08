@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Point;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.view.Display;
@@ -19,11 +20,18 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 
 /**
  * Created by Santanu Kumar Sahu on 8/13/2016.
  */
 public class Util {
+    public static final String SERVICE_INCOMING_MSG="SERVICE_INCOMING_MSG";
+    public static final String ARG_MSG_FROM="ARG_MSG_FROM";
+    public static final String ARG_MSG_TO="ARG_MSG_TO";
+    public static final String ARG_MSG_DATA="ARG_MSG_DATA";
+    public static final String ARG_MSG_CONTENT="ARG_MSG_CONTENT";
+
     public static final String PREFF_FILE="PREFF_FILE_C4F";
 
     public static final String PREE_APP_CONFIG="PREE_APP_CONFIG";
@@ -145,8 +153,7 @@ public class Util {
         }
     }
 
-    public boolean checkGCMToken(){
-        boolean bGotNew=false;
+    public String checkGCMToken(){
 
         String sCurrentToken=this.getPref(Util.PREE_GCM_TOKEN,"");
         sCurrentToken=sCurrentToken.trim();
@@ -159,15 +166,15 @@ public class Util {
 
                 if(gcm_token.length()>0 && !gcm_token.equals(sCurrentToken)){
                     this.setPref(Util.PREE_GCM_TOKEN,gcm_token);
-                    return true;
+                    return gcm_token;
                 }else{
-                    return false;
+                    return sCurrentToken;
                 }
             }catch (Exception ex){
                 ex.printStackTrace();
             }
         }
-        return bGotNew;
+        return sCurrentToken;
     }
 
     public String generateURL(String base,String path){
@@ -183,5 +190,53 @@ public class Util {
         }catch (Exception ex){
             return null;
         }
+    }
+
+    public boolean isInternetAvailable() {
+        try {
+            InetAddress ipAddr = InetAddress.getByName("google.com"); //You can replace it with your name
+            return !ipAddr.equals("");
+
+        } catch (Exception e) {
+            return false;
+        }
+
+    }
+
+    private iNotify listenr1;
+    private iNotify listenr2;
+
+
+
+    public void attachListener1(iNotify listenr1){
+        this.listenr1=listenr1;
+    }
+
+    public void attachListener2(iNotify listenr2){
+        this.listenr2=listenr2;
+    }
+
+    public void removeListener1(){
+        this.listenr1=null;
+    }
+
+    public void removeListener2(){
+        this.listenr2=null;
+    }
+
+    public static void doNotify(Bundle bundle){
+        if(Util.instance!=null){
+            if(Util.instance.listenr1!=null){
+                Util.instance.listenr1.onMessage(bundle);
+            }
+
+            if(Util.instance.listenr2!=null){
+                Util.instance.listenr2.onMessage(bundle);
+            }
+        }
+    }
+
+    public interface iNotify{
+        public void onMessage(Bundle bundle);
     }
 }

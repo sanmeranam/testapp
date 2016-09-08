@@ -10,5 +10,6 @@
   "cgm_token":"/{domain}/service/config/cgm_token",
   "getprofile":"/{domain}/service/config/getprofile",
   "setprofile":"/{domain}/service/config/setprofile",
-  "getallusers":"/{domain}/service/config/getallusers"
+  "getallusers":"/{domain}/service/config/getallusers",
+  "onmessage":"/{domain}/service/config/onmessage"
 }
