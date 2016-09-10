@@ -1,8 +1,6 @@
 package com.cloud4form.app.pages;
 
 import android.app.Fragment;
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,9 +8,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.cloud4form.app.R;
-import com.cloud4form.app.Util;
-import com.cloud4form.app.other.RoundedImageView;
-import com.cloud4form.app.other.UserProfileEntity;
+import com.cloud4form.app.AppController;
+import com.cloud4form.app.db.User;
 
 
 public class AccountViewFragment extends Fragment {
@@ -25,7 +22,7 @@ public class AccountViewFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private UserProfileEntity profileEntity;
+    private User profileEntity;
 
     public AccountViewFragment() {
         // Required empty public constructor
@@ -56,8 +53,8 @@ public class AccountViewFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        if(mParam1.equals("SELF") && Util.CURRENT_USER!=null){
-            profileEntity=Util.CURRENT_USER;
+        if(mParam1.equals("SELF") && AppController.CURRENT_USER!=null){
+            profileEntity= AppController.CURRENT_USER;
         }
     }
 
@@ -65,12 +62,12 @@ public class AccountViewFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
         View RootView=inflater.inflate(R.layout.fragment_account_view, container, false);
         if(profileEntity!=null){
-            ((TextView)RootView.findViewById(R.id.textViewName)).setText(profileEntity.firstName+" "+profileEntity.lastName);
-            ((TextView)RootView.findViewById(R.id.textViewEmail)).setText(profileEntity.email);
+            ((TextView)RootView.findViewById(R.id.textViewName)).setText(profileEntity.getFirstName()+" "+profileEntity.getLastName());
+            ((TextView)RootView.findViewById(R.id.textViewEmail)).setText(profileEntity.getEmail());
             ((TextView)RootView.findViewById(R.id.textViewGroup)).setText("misc");
             ((TextView)RootView.findViewById(R.id.textViewPhone)).setText("000");
-            if(profileEntity.profile!=null){
-                ((RoundedImageView)RootView.findViewById(R.id.NavviewImage)).setImageBitmap(profileEntity.profile);
+            if(profileEntity.getImage()!=null){
+//                ((RoundedImageView)RootView.findViewById(R.id.NavviewImage)).setImageBitmap(profileEntity.profile);
             }
         }
         return RootView;

@@ -11,21 +11,24 @@ import android.support.annotation.Nullable;
 import android.view.Display;
 import android.view.WindowManager;
 
-import com.cloud4form.app.other.UserProfileEntity;
+import com.cloud4form.app.db.FileConnection;
+import com.cloud4form.app.db.User;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 
 /**
  * Created by Santanu Kumar Sahu on 8/13/2016.
  */
-public class Util {
+public class AppController {
+
+
+
     public static final String SERVICE_INCOMING_MSG="SERVICE_INCOMING_MSG";
     public static final String ARG_MSG_FROM="ARG_MSG_FROM";
     public static final String ARG_MSG_TO="ARG_MSG_TO";
@@ -45,10 +48,33 @@ public class Util {
     public static final String PREE_APP_WORK_MODE_ONLINE="PREE_APP_WORK_MODE_ONLINE";
     public static final String PREE_APP_LOCAL_PATH="PREE_APP_LOCAL_PATH";
 
-    public static UserProfileEntity CURRENT_USER;
+    public static User CURRENT_USER;
+
+    public SharedPreferences PREFF;
+    public JSONObject AppConfig;
+
+    private static AppController instance;
+    private Context context;
+
+    public FileConnection Filo;
+
+    private AppController(Context context){
+        this.context=context;
+        this.PREFF = this.context.getSharedPreferences(PREFF_FILE, Context.MODE_PRIVATE);
+        this.AppConfig=this.loadAssetFile();
+        Filo=new FileConnection(this.context);
+    }
 
     public void setPref(String key,String value){
         this.PREFF.edit().putString(key,value).commit();
+    }
+
+
+    public static AppController getInstance(Context context){
+        if(AppController.instance==null){
+            AppController.instance=new AppController(context);
+        }
+        return AppController.instance;
     }
 
     public String getPref(String key,String def){
@@ -82,23 +108,6 @@ public class Util {
         }catch (Exception ex){
             return new JSONArray();
         }
-    }
-
-    private static Util instance;
-    public static Util getInstance(Context context){
-        if(Util.instance==null){
-            Util.instance=new Util(context);
-        }
-        return Util.instance;
-    }
-
-    private Context context;
-    public SharedPreferences PREFF;
-    public JSONObject AppConfig;
-    private Util(Context context){
-        this.context=context;
-        this.PREFF = this.context.getSharedPreferences(PREFF_FILE, Context.MODE_PRIVATE);
-        this.AppConfig=this.loadAssetFile();
     }
 
     @Nullable
@@ -155,7 +164,7 @@ public class Util {
 
     public String checkGCMToken(){
 
-        String sCurrentToken=this.getPref(Util.PREE_GCM_TOKEN,"");
+        String sCurrentToken=this.getPref(AppController.PREE_GCM_TOKEN,"");
         sCurrentToken=sCurrentToken.trim();
 
         if(sCurrentToken.length()==0){
@@ -165,7 +174,7 @@ public class Util {
                 gcm_token=gcm_token.trim();
 
                 if(gcm_token.length()>0 && !gcm_token.equals(sCurrentToken)){
-                    this.setPref(Util.PREE_GCM_TOKEN,gcm_token);
+                    this.setPref(AppController.PREE_GCM_TOKEN,gcm_token);
                     return gcm_token;
                 }else{
                     return sCurrentToken;
@@ -184,7 +193,7 @@ public class Util {
             String sFullURL=sBaseValue+sBasePath;
 
             if(sFullURL.contains("{domain}")){
-                sFullURL=sFullURL.replace("{domain}",this.getPref(Util.PREE_APP_TENANT));
+                sFullURL=sFullURL.replace("{domain}",this.getPref(AppController.PREE_APP_TENANT));
             }
             return sFullURL;
         }catch (Exception ex){
@@ -192,7 +201,7 @@ public class Util {
         }
     }
 
-    public boolean isInternetAvailable() {
+    public static boolean isInternetAvailable() {
         try {
             InetAddress ipAddr = InetAddress.getByName("google.com"); //You can replace it with your name
             return !ipAddr.equals("");
@@ -224,16 +233,21 @@ public class Util {
         this.listenr2=null;
     }
 
-    public static void doNotify(Bundle bundle){
-        if(Util.instance!=null){
-            if(Util.instance.listenr1!=null){
-                Util.instance.listenr1.onMessage(bundle);
+    public static boolean doNotify(Bundle bundle){
+        boolean isSent=false;
+
+        if(AppController.instance!=null){
+            if(AppController.instance.listenr1!=null){
+                AppController.instance.listenr1.onMessage(bundle);
+                isSent=true;
             }
 
-            if(Util.instance.listenr2!=null){
-                Util.instance.listenr2.onMessage(bundle);
+            if(AppController.instance.listenr2!=null){
+                AppController.instance.listenr2.onMessage(bundle);
+                isSent=true;
             }
         }
+        return isSent;
     }
 
     public interface iNotify{

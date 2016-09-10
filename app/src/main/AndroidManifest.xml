@@ -91,7 +91,7 @@
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".HomeActivitySlider" />
+                android:value="com.cloud4form.app.HomeActivitySlider" />
         </activity>
         <activity
             android:name=".audio.AudioRecord"
@@ -125,9 +125,19 @@
             android:label="@string/title_activity_settings">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".HomeActivitySlider" />
+                android:value="com.cloud4form.app.HomeActivitySlider" />
         </activity>
-        <activity android:name=".pages.ChatActivity"></activity>
+        <activity android:name=".pages.ChatActivity" android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:launchMode="singleTop"
+            android:name=".pages.ChatProfileActivity"
+            android:label="@string/title_activity_char_profile"
+            android:parentActivityName=".HomeActivitySlider"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.cloud4form.app.HomeActivitySlider" />
+        </activity>
     </application>
 
 </manifest>

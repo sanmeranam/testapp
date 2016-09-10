@@ -2,7 +2,6 @@ package com.cloud4form.app;
 
 import android.content.Intent;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,7 +13,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.cloud4form.app.other.GenericAsyncTask;
-import com.cloud4form.app.other.JSONSync;
 import com.cloud4form.app.barcode.SimpleScannerActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -26,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
 
-    private Util util;
+    private AppController appController;
     private ProgressBar _mProg;
     private Button _mScanButton;
     private TextView _mTextView;
@@ -38,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        util = Util.getInstance(this);
+        appController = AppController.getInstance(this);
 
         _mProg = (ProgressBar) findViewById(R.id.progress);
         _mScanButton = (Button) findViewById(R.id.button_scan);
@@ -60,8 +58,8 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onStart() {
 
-        String appConfig = util.getPref(Util.PREE_APP_CONFIG);
-        String appToken = util.getPref(Util.PREE_USER_PROFILE);
+        String appConfig = appController.getPref(AppController.PREE_APP_CONFIG);
+        String appToken = appController.getPref(AppController.PREE_USER_PROFILE);
 
         if (appConfig == null) {
             _mTextView.setVisibility(View.VISIBLE);
@@ -86,9 +84,9 @@ public class MainActivity extends AppCompatActivity implements
         try{
             if(response.has("success") && response.getInt("success")==1){
                 JSONObject oData=response.getJSONObject("data");
-                util.saveJSONData(oData,Util.PREE_APP_CONFIG);
-                util.setPref(Util.PREE_APP_TENANT,oData.getString("domain"));
-                util.setPref(Util.PREE_APP_WORK_MODE,Util.PREE_APP_WORK_MODE_ONLINE);
+                appController.saveJSONData(oData, AppController.PREE_APP_CONFIG);
+                appController.setPref(AppController.PREE_APP_TENANT,oData.getString("domain"));
+                appController.setPref(AppController.PREE_APP_WORK_MODE, AppController.PREE_APP_WORK_MODE_ONLINE);
 
                 Intent loginPage=new Intent(MainActivity.this,LoginActivity.class);
                 startActivity(loginPage);
@@ -110,10 +108,10 @@ public class MainActivity extends AppCompatActivity implements
         try {
 
             JSONObject dataToSend = new JSONObject();
-            dataToSend.put("DEVICE_ID", this.util.getDeviceId());
+            dataToSend.put("DEVICE_ID", this.appController.getDeviceId());
             dataToSend.put("SCAN_ID", scanId);
-            dataToSend.put("DEVICE_MODEL", this.util.getDeviceModel());
-            dataToSend.put("DEVICE_SCREEN", this.util.getDeviceScreen());
+            dataToSend.put("DEVICE_MODEL", this.appController.getDeviceModel());
+            dataToSend.put("DEVICE_SCREEN", this.appController.getDeviceScreen());
 
             if(mLastLocationLast!=null){
                 JSONObject loca=new JSONObject();
@@ -122,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements
                 dataToSend.put("LOCATION",loca);
             }
 
-            new GenericAsyncTask(util.generateURL("api_url","sync_path"),new GenericAsyncTask.IAsyncCallback() {
+            new GenericAsyncTask(appController.generateURL("api_url","sync_path"),new GenericAsyncTask.IAsyncCallback() {
                 @Override
                 public void onResult(JSONObject result) {
                     onResultRemote(result);

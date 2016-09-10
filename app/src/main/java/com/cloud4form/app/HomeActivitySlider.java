@@ -19,26 +19,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.cloud4form.app.other.FormMetaEntity;
-import com.cloud4form.app.other.GenericAsyncTask;
+import com.cloud4form.app.db.User;
 import com.cloud4form.app.other.JSONSync;
-import com.cloud4form.app.other.RoundedImageView;
-import com.cloud4form.app.other.UserProfileEntity;
 import com.cloud4form.app.pages.AccountViewFragment;
-import com.cloud4form.app.pages.ChatProfileFragment;
+import com.cloud4form.app.pages.ChatProfileActivity;
 import com.cloud4form.app.pages.FormViewFragment;
 import com.cloud4form.app.pages.SettingsActivity;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
-
-import org.json.JSONArray;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 public class HomeActivitySlider extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private Util util;
-    private UserProfileEntity userProfileEntity;
+    private AppController appController;
+    private User user;
     private Fragment currentView;
     private Toolbar toolbar;
 
@@ -49,7 +41,7 @@ public class HomeActivitySlider extends AppCompatActivity implements NavigationV
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        util=Util.getInstance(this);
+        appController = AppController.getInstance(this);
 
         final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -63,14 +55,14 @@ public class HomeActivitySlider extends AppCompatActivity implements NavigationV
         View header=navigationView.getHeaderView(0);
 
 
-        userProfileEntity=new UserProfileEntity(util.getAsJSON(Util.PREE_USER_PROFILE));
-        Util.CURRENT_USER=userProfileEntity;
+        user=new User(appController.getAsJSON(AppController.PREE_USER_PROFILE));
+        AppController.CURRENT_USER=user;
 
-        ((TextView)header.findViewById(R.id.nav_top_name)).setText(userProfileEntity.firstName+" "+userProfileEntity.lastName);
-        ((TextView)header.findViewById(R.id.nav_top_email)).setText(userProfileEntity.email);
+        ((TextView)header.findViewById(R.id.nav_top_name)).setText(user.getFirstName()+" "+user.getLastName());
+        ((TextView)header.findViewById(R.id.nav_top_email)).setText(user.getEmail());
 
-        if(userProfileEntity.profile!=null){
-            ((RoundedImageView)header.findViewById(R.id.NavviewImage)).setImageBitmap(userProfileEntity.profile);
+        if(user.getImage()!=null){
+//            ((RoundedImageView)header.findViewById(R.id.NavviewImage)).setImageBitmap(user.profile);
         }
 
         header.setOnClickListener(new View.OnClickListener() {
@@ -91,7 +83,7 @@ public class HomeActivitySlider extends AppCompatActivity implements NavigationV
         super.onStart();
 
 
-        if(util.getPref(Util.PREE_APP_WORK_MODE).equals(util.getPref(Util.PREE_APP_WORK_MODE_OFFLINE))){
+        if(appController.getPref(AppController.PREE_APP_WORK_MODE).equals(appController.getPref(AppController.PREE_APP_WORK_MODE_OFFLINE))){
             return;
         }
         registerBackground();
@@ -106,15 +98,15 @@ public class HomeActivitySlider extends AppCompatActivity implements NavigationV
         new AsyncTask<Void,Void,Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                String gToken=util.checkGCMToken();
+                String gToken= appController.checkGCMToken();
                 if(gToken!=null && gToken.trim().length()>10){
                     try {
                         JSONObject req=new JSONObject();
                         req.put("GCM_TOKEN",gToken);
-                        req.put("USER_ID",util.getAsJSON(Util.PREE_USER_PROFILE).getString("_id"));
+                        req.put("USER_ID", appController.getAsJSON(AppController.PREE_USER_PROFILE).getString("_id"));
 
                         JSONSync jsync = new JSONSync(null);
-                        JSONObject resp=jsync.getJsonPost(util.generateURL("api_url", "cgm_token"), req);
+                        JSONObject resp=jsync.getJsonPost(appController.generateURL("api_url", "cgm_token"), req);
                     }catch (Exception ex){
                     }
                 }
@@ -171,11 +163,11 @@ public class HomeActivitySlider extends AppCompatActivity implements NavigationV
                 switch (which){
                     case DialogInterface.BUTTON_POSITIVE:
 
-                        util.removePref(Util.PREE_USER_PROFILE);
-                        util.removePref(Util.PREE_APP_FORMS);
-                        util.removePref(Util.PREE_SYNC_TOKEN);
-                        util.removePref(Util.PREE_GCM_TOKEN);
-                        Util.CURRENT_USER=null;
+                        appController.removePref(AppController.PREE_USER_PROFILE);
+                        appController.removePref(AppController.PREE_APP_FORMS);
+                        appController.removePref(AppController.PREE_SYNC_TOKEN);
+                        appController.removePref(AppController.PREE_GCM_TOKEN);
+                        AppController.CURRENT_USER=null;
 
                         Intent intent = new Intent(HomeActivitySlider.this,LoginActivity.class);
                         startActivity(intent);
@@ -210,8 +202,10 @@ public class HomeActivitySlider extends AppCompatActivity implements NavigationV
                 setTitle("Home");
                 break;
             case R.id.nav_chat:
-                switchFragment(ChatProfileFragment.newInstance());
-                setTitle("Message");
+                Intent chatIntent=new Intent(HomeActivitySlider.this, ChatProfileActivity.class);
+                startActivity(chatIntent);
+//                switchFragment(ChatProfileFragment.newInstance());
+//                setTitle("Message");
                 break;
             case R.id.nav_settings:
                 Intent settingIntent=new Intent(HomeActivitySlider.this, SettingsActivity.class);

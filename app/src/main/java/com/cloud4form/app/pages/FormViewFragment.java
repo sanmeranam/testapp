@@ -3,10 +3,7 @@ package com.cloud4form.app.pages;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,23 +15,25 @@ import android.widget.TextView;
 import com.cloud4form.app.FormDetailsActivity;
 import com.cloud4form.app.NewFormActivity;
 import com.cloud4form.app.R;
-import com.cloud4form.app.Util;
-import com.cloud4form.app.other.FormMetaEntity;
+import com.cloud4form.app.AppController;
+
+import com.cloud4form.app.db.FormMeta;
+import com.cloud4form.app.db.IEntity;
 import com.cloud4form.app.other.GenericAsyncTask;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class FormViewFragment extends Fragment {
 
-    private ArrayList<FormMetaEntity> formList=new ArrayList<>();
-    private Util util;
+    private ArrayList<FormMeta> formList;
+    private AppController appController;
     private View mRootView;
     private CardViewAdapter cardViewAdapter;
-    private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
     public FormViewFragment() {
@@ -51,59 +50,84 @@ public class FormViewFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        util=Util.getInstance(getActivity());
-
-        JSONArray jForms=util.getAsJSONArray(Util.PREE_APP_FORMS);
-        try {
-
-
-            for(int i=0;i<jForms.length();i++){
-                formList.add(new FormMetaEntity(jForms.getJSONObject(i)));
-            }
-
-            cardViewAdapter=new CardViewAdapter(getActivity(),formList);
+        appController = AppController.getInstance(getActivity());
+        formList=loadFormMetaFromDM();
+        cardViewAdapter=new CardViewAdapter(getActivity(),formList);
 
 
 
-        }catch (Exception ex){ex.printStackTrace();}
-    }
+        if(appController.getPref(AppController.PREE_APP_WORK_MODE).equals(appController.getPref(AppController.PREE_APP_WORK_MODE_ONLINE))){
 
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        if(util.getPref(Util.PREE_APP_WORK_MODE).equals(util.getPref(Util.PREE_APP_WORK_MODE_OFFLINE))){
-            return;
         }
-
-        updateRemoteList();
     }
 
-    private void updateRemoteList(){
+
+    private ArrayList<FormMeta> loadFormMetaFromDM(){
+        return appController.Filo.readArray(FormMeta.class);
+    }
+
+    private void loadFormMetaFromServer(){
         try {
             JSONObject dataToSend = new JSONObject();
-            dataToSend.put("ENTRY_ID", util.getPref(Util.PREE_SYNC_TOKEN));
+            dataToSend.put("ENTRY_ID", appController.getPref(AppController.PREE_SYNC_TOKEN));
 
-            new GenericAsyncTask(util.generateURL("api_url", "from_path"), new GenericAsyncTask.IAsyncCallback() {
+            new GenericAsyncTask(appController.generateURL("api_url", "from_path"), new GenericAsyncTask.IAsyncCallback() {
                 @Override
                 public void onResult(JSONObject result) throws Exception {
-                    if(result.has("success") && result.getInt("success")==1){
+                    if(result!=null && result.has("success") && result.getInt("success")==1){
                         JSONArray data=result.getJSONArray("data");
-                        util.setPref(Util.PREE_APP_FORMS,data.toString());
 
-                        formList.clear();
-                        for(int i=0;i<data.length();i++){
-                            formList.add(new FormMetaEntity(data.getJSONObject(i)));
+                        HashMap<String,FormMeta> map=new HashMap<String, FormMeta>();
+                        //Creating map of exist forms
+                        for(FormMeta f:formList){
+                            map.put(f.getServerId(),f);
                         }
-                        FormViewFragment.this.cardViewAdapter.notifyDataSetChanged();
+
+                        boolean hasUpdate=false;
+                        //Comparing with old list
+                        for(int i=0;i<data.length();i++){
+
+                            FormMeta fNew=new FormMeta(data.getJSONObject(i));
+                            //If already exist check version and update
+                            if(map.containsKey(fNew.getServerId())){
+                                FormMeta fOld=map.get(fNew.getServerId());
+
+                                if(fOld.getVersion()<fNew.getVersion()){
+                                    map.remove(fNew.getServerId());
+                                    map.put(fNew.getServerId(),fNew);
+                                    hasUpdate=true;
+                                }
+                            }else{//If not exist, just add it
+                                map.put(fNew.getServerId(),fNew);
+                                hasUpdate=true;
+                            }
+                        }
+
+                        ArrayList<FormMeta> m=new ArrayList<FormMeta>(map.values());
+                        formList.clear();
+                        for(FormMeta mm:m){
+                            formList.add(mm);
+                        }
+
+                        if(FormViewFragment.this.cardViewAdapter!=null)
+                            FormViewFragment.this.cardViewAdapter.notifyDataSetChanged();
+
+                        if(hasUpdate){
+                            InsertOrUpdate();
+                        }
                     }
                 }
             }).execute(dataToSend);
 
         }catch (Exception ex){
-
+            ex.printStackTrace();
         }
     }
+
+    private void InsertOrUpdate(){
+        appController.Filo.saveArray(formList,FormMeta.class);
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
@@ -114,6 +138,8 @@ public class FormViewFragment extends Fragment {
             mLayoutManager = new LinearLayoutManager(getActivity());
             mRecyclerView.setLayoutManager(mLayoutManager);
             mRecyclerView.setAdapter(cardViewAdapter);
+
+            loadFormMetaFromServer();
         }catch (Exception ex){
             ex.printStackTrace();
         }
@@ -124,9 +150,9 @@ public class FormViewFragment extends Fragment {
     private class CardViewAdapter extends RecyclerView.Adapter<CardViewAdapter.MyViewHolder>{
 
         private Context context;
-        private ArrayList<FormMetaEntity> list;
+        private List<FormMeta> list;
 
-        CardViewAdapter(Context context,ArrayList<FormMetaEntity> list){
+        CardViewAdapter(Context context,List<FormMeta> list){
             this.context=context;
             this.list=list;
         }
@@ -139,9 +165,9 @@ public class FormViewFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(MyViewHolder holder, int position) {
-            FormMetaEntity entity=list.get(position);
-            holder.title.setText(entity.formName);
-            holder.version.setText("v"+entity.version);
+            FormMeta entity=list.get(position);
+            holder.title.setText(entity.getName());
+            holder.version.setText("v"+entity.getVersion());
             holder.count.setText("0");
 
             holder.btnDetails.setTag(entity);
@@ -151,8 +177,9 @@ public class FormViewFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     Intent newForm=new Intent(getActivity(), NewFormActivity.class);
-                    newForm.putExtra(FormMetaEntity.ARG_DATA,((FormMetaEntity)v.getTag()).toString());
-                    newForm.putExtra(FormMetaEntity.ARG_MODE,FormMetaEntity.ARG_MODE_NEW);
+
+                    newForm.putExtra(IEntity.ARG_DATA,(FormMeta)v.getTag());
+                    newForm.putExtra(IEntity.ARG_MODE,IEntity.ARG_MODE_NEW);
                     getActivity().startActivity(newForm);
                 }
             });
@@ -160,7 +187,7 @@ public class FormViewFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     Intent newForm=new Intent(getActivity(), FormDetailsActivity.class);
-                    newForm.putExtra(FormMetaEntity.ARG_DATA,((FormMetaEntity)v.getTag()).toString());
+                    newForm.putExtra(IEntity.ARG_DATA,(FormMeta)v.getTag());
                     getActivity().startActivity(newForm);
                 }
             });

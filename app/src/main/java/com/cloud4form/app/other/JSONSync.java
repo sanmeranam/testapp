@@ -1,15 +1,12 @@
 package com.cloud4form.app.other;
 
-import android.content.Context;
+import com.cloud4form.app.AppController;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Scanner;
@@ -26,6 +23,9 @@ public class JSONSync {
 
     public JSONObject getJsonGet(String surl,String token){
 
+        if(!AppController.isInternetAvailable()){
+            return null;
+        }
         try{
             URL url=new URL(surl);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -56,6 +56,9 @@ public class JSONSync {
     }
 
     public JSONObject getJsonPost(String surl,JSONObject data){
+        if(!AppController.isInternetAvailable()){
+            return null;
+        }
         try{
             URL url=new URL(surl);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -91,6 +94,9 @@ public class JSONSync {
     }
 
     public JSONObject getJsonPut(String surl,JSONObject data){
+        if(!AppController.isInternetAvailable()){
+            return null;
+        }
         try{
             URL url=new URL(surl);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -125,6 +131,9 @@ public class JSONSync {
     }
 
     public JSONObject getJsonDelete(String surl){
+        if(!AppController.isInternetAvailable()){
+            return null;
+        }
         try{
             URL url=new URL(surl);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();

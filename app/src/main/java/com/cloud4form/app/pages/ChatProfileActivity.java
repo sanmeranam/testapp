@@ -1,12 +1,13 @@
 package com.cloud4form.app.pages;
 
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,8 +17,9 @@ import android.widget.TextView;
 
 import com.cloud4form.app.R;
 import com.cloud4form.app.AppController;
-import com.cloud4form.app.db.User;
+import com.cloud4form.app.db.ChatItem;
 import com.cloud4form.app.db.IEntity;
+import com.cloud4form.app.db.User;
 import com.cloud4form.app.other.GenericAsyncTask;
 import com.cloud4form.app.other.RoundedImageView;
 
@@ -25,42 +27,84 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-
-public class ChatProfileFragment extends Fragment {
-
+public class ChatProfileActivity extends AppCompatActivity {
     private AppController appController;
     private ProgressBar progressBar;
     private FloatingActionButton reloadButton;
     private ArrayList<User> userList;
     private CardViewAdapter cardViewAdapter;
-    private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private HashMap<String,Integer> mapUnread=new HashMap<>();
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_char_profile);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-    public ChatProfileFragment() {
-        // Required empty public constructor
-    }
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+               loadUsersFromServer();
+            }
+        });
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        progressBar=(ProgressBar) findViewById(R.id.progressBar);
 
-    public static ChatProfileFragment newInstance() {
-        ChatProfileFragment fragment = new ChatProfileFragment();
-        return fragment;
+        appController = AppController.getInstance(this);
+
+        userList=loadUsersFromDB();
+        cardViewAdapter=new CardViewAdapter(this,userList);
+
+        try {
+            RecyclerView mRecyclerView = (RecyclerView)findViewById(R.id.recycler_view);
+            mRecyclerView.setHasFixedSize(true);
+            mLayoutManager = new LinearLayoutManager(this);
+            mRecyclerView.setLayoutManager(mLayoutManager);
+            mRecyclerView.setAdapter(cardViewAdapter);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+
+        loadUsersFromServer();
+
+        loadChatFromDB();
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
 
-        appController = AppController.getInstance(getActivity());
-
-        userList=loadUsersFromDB();
-        cardViewAdapter=new CardViewAdapter(getActivity(),userList);
     }
 
     private ArrayList<User> loadUsersFromDB(){
         return appController.Filo.readArray(User.class);
+    }
+
+    private void loadChatFromDB(){
+        ArrayList<ChatItem> cList= appController.Filo.readArray(ChatItem.class);
+
+        HashMap<String,User> uMap=new HashMap<>();
+        for(User u:userList){
+            uMap.put(u.getServerId(),u);
+        }
+
+        for(ChatItem c:cList){
+            if(uMap.containsKey(c.getFrom()) && c.getTo().equals("SELF") && !c.isRead()){
+                if(!mapUnread.containsKey(c.getFrom())){
+                    mapUnread.put(c.getFrom(),0);
+                }
+
+                Integer count=mapUnread.get(c.getFrom());
+                count++;
+                mapUnread.put(c.getFrom(),count);
+            }
+        }
     }
 
     private void saveToDb(){
@@ -68,7 +112,7 @@ public class ChatProfileFragment extends Fragment {
     }
 
     private void loadUsersFromServer(){
-        this.progressBar.setVisibility(View.VISIBLE);
+//        this.progressBar.setVisibility(View.VISIBLE);
         new GenericAsyncTask(appController.generateURL("api_url", "getallusers"), new GenericAsyncTask.IAsyncCallback() {
             @Override
             public void onResult(JSONObject result) throws Exception {
@@ -97,25 +141,6 @@ public class ChatProfileFragment extends Fragment {
         }).execute(new JSONObject());
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
-        View rootView=inflater.inflate(R.layout.fragment_chat_profile, container, false);
-        progressBar=(ProgressBar) rootView.findViewById(R.id.progressBar);
-
-        try {
-            RecyclerView mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
-            mRecyclerView.setHasFixedSize(true);
-            mLayoutManager = new LinearLayoutManager(getActivity());
-            mRecyclerView.setLayoutManager(mLayoutManager);
-            mRecyclerView.setAdapter(cardViewAdapter);
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-
-        loadUsersFromServer();
-        return rootView;
-    }
-
     private class CardViewAdapter extends RecyclerView.Adapter<CardViewAdapter.MyViewHolder>{
 
         private Context context;
@@ -138,16 +163,18 @@ public class ChatProfileFragment extends Fragment {
             holder.title.setText(entity.getFirstName()+" "+entity.getLastName());
             holder.subtitle.setText(entity.getEmail());
 
-//            int len=entity.getUnreadCount();
-//
-//            if(len==0){
-//                holder.count.setVisibility(View.GONE);
-//            }else{
-//                holder.count.setVisibility(View.VISIBLE);
-//                holder.count.setText(len+"");
-//            }
-//
-//            holder.count.setText(len==0?"":len+"");
+            if(!mapUnread.containsKey(entity.getServerId())){
+                mapUnread.put(entity.getServerId(),0);
+            }
+
+            Integer iCount=mapUnread.get(entity.getServerId());
+
+            if(iCount==0){
+                holder.count.setVisibility(View.INVISIBLE);
+            }else{
+                holder.count.setVisibility(View.VISIBLE);
+                holder.count.setText(iCount+"");
+            }
 
             if(entity.getImage()!=null){
 //                holder.user.setImageBitmap(entity.profile);
@@ -180,9 +207,11 @@ public class ChatProfileFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
                         User entity=(User)v.getTag();
-                        Intent dd=new Intent(getActivity(),ChatActivity.class);
+                        mapUnread.remove(entity.getServerId());
+                        Intent dd=new Intent(ChatProfileActivity.this,ChatActivity.class);
                         dd.putExtra(IEntity.ARG_DATA,entity);
-                        getActivity().startActivity(dd);
+                        startActivity(dd);
+                        cardViewAdapter.notifyDataSetChanged();
                     }
                 });
             }
@@ -190,20 +219,31 @@ public class ChatProfileFragment extends Fragment {
     }
 
     private void onMessageRecive(Bundle bundle){
-        String from=bundle.getString("from1");
-        String message=bundle.getString("message1");
-
         String event=bundle.getString("event");
         String action=bundle.getString("action");
+
         if(event.equals("USER_EVENT") && action.equals("USER_MESSAGE")) {
+
+            String from=bundle.getString("from1");
+            String message=bundle.getString("message1");
+
+
             for (int i = 0; i < userList.size(); i++) {
                 User entity = userList.get(i);
 
                 if (entity.getServerId().equals(from)) {
 
-//                    entity.getInbox().add(new ChatItem(from,message));
+                    if(!mapUnread.containsKey(entity.getServerId())){
+                        mapUnread.put(entity.getServerId(),0);
+                    }
 
-                    getActivity().runOnUiThread(new Runnable() {
+                    Integer iCount=mapUnread.get(entity.getServerId());
+
+                    iCount=iCount+1;
+
+                    mapUnread.put(entity.getServerId(),iCount);
+
+                    this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             cardViewAdapter.notifyDataSetChanged();
@@ -217,6 +257,12 @@ public class ChatProfileFragment extends Fragment {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        loadChatFromDB();
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
 
@@ -227,12 +273,13 @@ public class ChatProfileFragment extends Fragment {
                 onMessageRecive(bundle);
             }
         });
+
     }
 
     @Override
     public void onPause() {
         super.onPause();
-       appController.removeListener1();
+        appController.removeListener1();
     }
 
 }

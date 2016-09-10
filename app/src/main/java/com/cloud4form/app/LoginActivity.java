@@ -4,42 +4,29 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.cloud4form.app.other.GenericAsyncTask;
-import com.cloud4form.app.other.JSONSync;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.google.android.gms.iid.InstanceID;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
-
-import java.util.List;
-
-import static android.Manifest.permission.READ_CONTACTS;
 
 /**
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity{
 
-    private Util util;
+    private AppController appController;
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private View mProgressView;
@@ -76,7 +63,7 @@ public class LoginActivity extends AppCompatActivity{
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-        util=Util.getInstance(this);
+        appController = AppController.getInstance(this);
 
 
 
@@ -148,7 +135,7 @@ public class LoginActivity extends AppCompatActivity{
     private void initLoginProcess(String email,String pass){
         try {
 
-            JSONObject oConfig=util.getAsJSON(Util.PREE_APP_CONFIG);
+            JSONObject oConfig= appController.getAsJSON(AppController.PREE_APP_CONFIG);
             String entryId=oConfig.getString("entryId");
 
             JSONObject toSend=new JSONObject();
@@ -157,7 +144,7 @@ public class LoginActivity extends AppCompatActivity{
             toSend.put("USER",email);
             toSend.put("PASSWORD",pass);
 
-            new GenericAsyncTask(util.generateURL("api_url","signin_path"), new GenericAsyncTask.IAsyncCallback() {
+            new GenericAsyncTask(appController.generateURL("api_url","signin_path"), new GenericAsyncTask.IAsyncCallback() {
                 @Override
                 public void onResult(JSONObject response)throws Exception {
 
@@ -167,19 +154,19 @@ public class LoginActivity extends AppCompatActivity{
                         JSONObject oData=response.getJSONObject("data");
 
                         if(oData.has("TOKEN")){
-                            util.setPref(Util.PREE_SYNC_TOKEN,oData.getString("TOKEN"));
+                            appController.setPref(AppController.PREE_SYNC_TOKEN,oData.getString("TOKEN"));
                         }
 
                         if(oData.has("PROFILE")){
                             JSONObject prof=oData.getJSONObject("PROFILE");
-                            util.saveJSONData(prof,Util.PREE_USER_PROFILE);
+                            appController.saveJSONData(prof, AppController.PREE_USER_PROFILE);
                             if(prof.has("cgm_token") && prof.getString("cgm_token").trim().length()!=0){
-                                util.setPref(Util.PREE_GCM_TOKEN,prof.getString("cgm_token"));
+                                appController.setPref(AppController.PREE_GCM_TOKEN,prof.getString("cgm_token"));
                             }
                         }
 
                         if(oData.has("FORM_META")){
-                            util.setPref(Util.PREE_APP_FORMS,oData.getJSONArray("FORM_META").toString());
+                            appController.setPref(AppController.PREE_APP_FORMS,oData.getJSONArray("FORM_META").toString());
                         }
                         AuthSuccess();
                     }else{

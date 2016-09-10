@@ -1,48 +1,86 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.cloud4form.app.pages.ChatActivity">
+    android:fitsSystemWindows="true"
+    tools:context=".pages.ChatProfileActivity">
 
-
-
-    <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/listViewChatItems"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_above="@+id/linearLayout" />
-
-    <LinearLayout
-        android:orientation="horizontal"
+    <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:weightSum="1"
-        android:id="@+id/linearLayout">
+        android:theme="@style/AppTheme.AppBarOverlay">
 
-        <EditText
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:paddingLeft="10dp"
+            android:layout_height="wrap_content">
+            <com.cloud4form.app.other.RoundedImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/user"
+                android:scaleType="fitXY"
+                android:layout_gravity="center"
+                android:id="@+id/imageProfile" />
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:popupTheme="@style/AppTheme.PopupOverlay" />
+        </LinearLayout>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:padding="5dp"
+        tools:context="com.cloud4form.app.pages.ChatActivity">
+
+
+
+        <ListView
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:inputType="textMultiLine"
-            android:ems="10"
-            android:id="@+id/textMessageInput"
-            android:layout_weight="0.8" />
+            android:layout_height="wrap_content"
+            android:id="@+id/listViewChatItems"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:divider="#00000000"
+            android:dividerHeight="0px"
+            android:layout_above="@+id/linearLayout" />
 
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            style="@style/Base.Widget.AppCompat.Button.Borderless"
-            android:id="@+id/buttonSend"
-            android:src="@drawable/ic_menu_send"
-            android:layout_weight="0.2" />
-    </LinearLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:background="#fff"
+            android:layout_alignParentStart="true"
+            android:weightSum="1"
+            android:id="@+id/linearLayout">
 
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:inputType="textMultiLine"
+                android:ems="10"
+                android:id="@+id/textMessageInput"
+                android:layout_weight="0.8" />
 
+            <ImageButton
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                android:id="@+id/buttonSend"
+                android:src="@drawable/ic_menu_send"
+                android:layout_weight="0.2" />
+        </LinearLayout>
+    </RelativeLayout>
 
-
-</RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>

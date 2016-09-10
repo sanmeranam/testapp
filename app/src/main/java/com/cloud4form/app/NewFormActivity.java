@@ -1,7 +1,6 @@
 package com.cloud4form.app;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,22 +10,19 @@ import android.webkit.GeolocationPermissions;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.Toast;
 
 import com.cloud4form.app.barcode.MyWebViewClient;
-import com.cloud4form.app.other.FormMetaEntity;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
-
-import java.io.IOException;
+import com.cloud4form.app.db.FormMeta;
+import com.cloud4form.app.db.IEntity;
 
 public class NewFormActivity extends AppCompatActivity {
 
-    private  WebView mWebView;
+    private WebView mWebView;
     private NewFormWebInterface newFormWebInterface;
-    private FormMetaEntity formDetails;
-    private Util util;
+    private FormMeta formDetails;
+    private AppController appController;
     private FloatingActionButton fabSend;
-    private String FORM_MODE=FormMetaEntity.ARG_MODE_NEW;
+    private String FORM_MODE= IEntity.ARG_MODE_NEW;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,17 +30,17 @@ public class NewFormActivity extends AppCompatActivity {
         setContentView(R.layout.activity_web_view);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
-        formDetails= FormMetaEntity.parse(getIntent().getStringExtra(FormMetaEntity.ARG_DATA));
+        formDetails=(FormMeta) getIntent().getSerializableExtra(IEntity.ARG_DATA);//FormMetaEntity.parse(getIntent().getStringExtra(FormMetaEntity.ARG_DATA));
 
-        toolbar.setTitle(formDetails.formName.toUpperCase());
+        toolbar.setTitle(formDetails.getName().toUpperCase());
         setSupportActionBar(toolbar);
 
-        FORM_MODE=getIntent().getStringExtra(FormMetaEntity.ARG_MODE);
+        FORM_MODE=getIntent().getStringExtra(IEntity.ARG_MODE);
 
 
-        util=Util.getInstance(this);
-        String token=util.getPref(Util.PREE_SYNC_TOKEN);
-        String domain=util.getPref(Util.PREE_APP_TENANT);
+        appController = AppController.getInstance(this);
+        String token= appController.getPref(AppController.PREE_SYNC_TOKEN);
+        String domain= appController.getPref(AppController.PREE_APP_TENANT);
 
 
 
@@ -84,9 +80,9 @@ public class NewFormActivity extends AppCompatActivity {
         mWebView.setWebViewClient(new MyWebViewClient(this));
 
         try{
-            String sURL=util.AppConfig.getString("app_url")+util.AppConfig.getString("form_new").replace("{1}",domain);
+            String sURL= appController.AppConfig.getString("app_url")+ appController.AppConfig.getString("form_new").replace("{1}",domain);
 
-            sURL+="?_f="+formDetails.formId+"&_t="+token+"&_m="+FORM_MODE;
+            sURL+="?_f="+formDetails.getServerId()+"&_t="+token+"&_m="+FORM_MODE;
 
             mWebView.loadUrl(sURL);
         }catch (Exception e){

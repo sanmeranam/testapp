@@ -1,12 +1,11 @@
 package com.cloud4form.app;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -16,14 +15,15 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
-import com.cloud4form.app.other.FormMetaEntity;
+import com.cloud4form.app.db.FormMeta;
+import com.cloud4form.app.db.IEntity;
 
 import java.io.File;
 
 public class FormDetailsActivity extends AppCompatActivity {
     private FloatingActionButton fabAddNew;
-    private FormMetaEntity formDetails;
-    private Util util;
+    private FormMeta formMeta;
+    private AppController appController;
     private WebView mWebView;
 
 
@@ -32,13 +32,13 @@ public class FormDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_form_details);
 
-        formDetails= FormMetaEntity.parse(getIntent().getStringExtra(FormMetaEntity.ARG_DATA));
+        formMeta = (FormMeta) getIntent().getSerializableExtra(IEntity.ARG_DATA);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(formDetails.formName.toUpperCase());
+        toolbar.setTitle(formMeta.getName().toUpperCase());
         setSupportActionBar(toolbar);
 
-        util=Util.getInstance(this);
+        appController = AppController.getInstance(this);
 
         this.initControls();
         this.initWebView();
@@ -50,16 +50,16 @@ public class FormDetailsActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent formInten=new Intent(FormDetailsActivity.this,NewFormActivity.class);
-                formInten.putExtra(FormMetaEntity.ARG_DATA,formDetails.toString());
-                formInten.putExtra(FormMetaEntity.ARG_MODE,FormMetaEntity.ARG_MODE_NEW);
+                formInten.putExtra(IEntity.ARG_DATA,formMeta);
+                formInten.putExtra(IEntity.ARG_MODE,IEntity.ARG_MODE_NEW);
                 startActivity(formInten);
             }
         });
     }
 
     private void initWebView(){
-        String token=util.getPref(Util.PREE_SYNC_TOKEN,"");
-        String domain=util.getPref(Util.PREE_APP_TENANT);
+        String token= appController.getPref(AppController.PREE_SYNC_TOKEN,"");
+        String domain= appController.getPref(AppController.PREE_APP_TENANT);
 
         mWebView = (WebView) findViewById(R.id.formWeb);
         WebSettings webSettings = mWebView.getSettings();
@@ -87,8 +87,8 @@ public class FormDetailsActivity extends AppCompatActivity {
         });
 
         try{
-            String sURL=util.AppConfig.getString("app_url")+util.AppConfig.getString("form_hist").replace("{1}",domain);
-            sURL+="?_f="+formDetails.formId+"&_t="+token;
+            String sURL= appController.AppConfig.getString("app_url")+ appController.AppConfig.getString("form_hist").replace("{1}",domain);
+            sURL+="?_f="+ formMeta.getServerId()+"&_t="+token;
             mWebView.loadUrl(sURL);
         }catch (Exception e){
             e.printStackTrace();
@@ -106,18 +106,16 @@ public class FormDetailsActivity extends AppCompatActivity {
         @JavascriptInterface
         public void openViewForm(String formFieldId){
             Intent formInten=new Intent(FormDetailsActivity.this,NewFormActivity.class);
-            formInten.putExtra(FormMetaEntity.ARG_DATA,formDetails.toString());
-            formInten.putExtra(FormMetaEntity.ARG_FORM_ENTRY_ID,formFieldId);
-            formInten.putExtra(FormMetaEntity.ARG_MODE,FormMetaEntity.ARG_MODE_VIEW);
+            formInten.putExtra(IEntity.ARG_DATA, (Parcelable) formMeta);
+            formInten.putExtra(IEntity.ARG_MODE,IEntity.ARG_MODE_VIEW);
             startActivity(formInten);
         }
 
         @JavascriptInterface
         public void openEditForm(String formFieldId){
             Intent formInten=new Intent(FormDetailsActivity.this,NewFormActivity.class);
-            formInten.putExtra(FormMetaEntity.ARG_DATA,formDetails.toString());
-            formInten.putExtra(FormMetaEntity.ARG_FORM_ENTRY_ID,formFieldId);
-            formInten.putExtra(FormMetaEntity.ARG_MODE,FormMetaEntity.ARG_MODE_EDIT);
+            formInten.putExtra(IEntity.ARG_DATA, (Parcelable) formMeta);
+            formInten.putExtra(IEntity.ARG_MODE,IEntity.ARG_MODE_EDIT);
             startActivity(formInten);
         }
 
