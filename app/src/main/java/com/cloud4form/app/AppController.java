@@ -1,5 +1,6 @@
 package com.cloud4form.app;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
@@ -8,6 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -16,18 +18,30 @@ import com.cloud4form.app.db.User;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 
+import net.gotev.uploadservice.MultipartUploadRequest;
+import net.gotev.uploadservice.UploadNotificationConfig;
+import net.gotev.uploadservice.UploadService;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.InetAddress;
 
 /**
  * Created by Santanu Kumar Sahu on 8/13/2016.
  */
-public class AppController {
+public class AppController  extends Application {
 
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
+    }
+
+    public static boolean isAppRunning=false;
 
     public static final String SERVICE_INCOMING_MSG="SERVICE_INCOMING_MSG";
     public static final String ARG_MSG_FROM="ARG_MSG_FROM";
@@ -64,6 +78,7 @@ public class AppController {
         this.AppConfig=this.loadAssetFile();
         Filo=new FileConnection(this.context);
     }
+
 
     public void setPref(String key,String value){
         this.PREFF.edit().putString(key,value).commit();
@@ -109,6 +124,20 @@ public class AppController {
             return new JSONArray();
         }
     }
+
+    public void uploadMultipart(final Context context,final File file) {
+        try {
+            String uploadId =
+                    new MultipartUploadRequest(context,this.generateURL("api_url","upload_url"))
+                            .addFileToUpload(file.getAbsolutePath(), "file1")
+                            .setNotificationConfig(new UploadNotificationConfig())
+                            .setMaxRetries(5)
+                            .startUpload();
+        } catch (Exception exc) {
+            Log.e("AndroidUploadService", exc.getMessage(), exc);
+        }
+    }
+
 
     @Nullable
     private JSONObject loadAssetFile(){
@@ -203,54 +232,12 @@ public class AppController {
 
     public static boolean isInternetAvailable() {
         try {
-            InetAddress ipAddr = InetAddress.getByName("google.com"); //You can replace it with your name
+            InetAddress ipAddr = InetAddress.getByName("api.egform.com"); //You can replace it with your name
             return !ipAddr.equals("");
 
         } catch (Exception e) {
             return false;
         }
-
     }
 
-    private iNotify listenr1;
-    private iNotify listenr2;
-
-
-
-    public void attachListener1(iNotify listenr1){
-        this.listenr1=listenr1;
-    }
-
-    public void attachListener2(iNotify listenr2){
-        this.listenr2=listenr2;
-    }
-
-    public void removeListener1(){
-        this.listenr1=null;
-    }
-
-    public void removeListener2(){
-        this.listenr2=null;
-    }
-
-    public static boolean doNotify(Bundle bundle){
-        boolean isSent=false;
-
-        if(AppController.instance!=null){
-            if(AppController.instance.listenr1!=null){
-                AppController.instance.listenr1.onMessage(bundle);
-                isSent=true;
-            }
-
-            if(AppController.instance.listenr2!=null){
-                AppController.instance.listenr2.onMessage(bundle);
-                isSent=true;
-            }
-        }
-        return isSent;
-    }
-
-    public interface iNotify{
-        public void onMessage(Bundle bundle);
-    }
 }

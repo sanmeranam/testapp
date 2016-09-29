@@ -87,7 +87,7 @@ public class FormDetailsActivity extends AppCompatActivity {
         });
 
         try{
-            String sURL= appController.AppConfig.getString("app_url")+ appController.AppConfig.getString("form_hist").replace("{1}",domain);
+            String sURL= appController.AppConfig.getString("app_url")+ appController.AppConfig.getString("form_hist").replace("{domain}",domain);
             sURL+="?_f="+ formMeta.getServerId()+"&_t="+token;
             mWebView.loadUrl(sURL);
         }catch (Exception e){

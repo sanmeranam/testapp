@@ -1,9 +1,12 @@
 package com.cloud4form.app.pages;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -74,6 +77,17 @@ public class ChatProfileActivity extends AppCompatActivity {
         loadUsersFromServer();
 
         loadChatFromDB();
+
+
+
+        IntentFilter mStatusIntentFilter = new IntentFilter("BROADCAST_ACTION_MSG");
+        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
+                                                                              @Override
+                                                                              public void onReceive(Context context, Intent intent) {
+                                                                                  onMessageRecive(intent.getBundleExtra("data"));
+                                                                              }
+                                                                          },
+                mStatusIntentFilter);
     }
 
     @Override
@@ -94,6 +108,7 @@ public class ChatProfileActivity extends AppCompatActivity {
             uMap.put(u.getServerId(),u);
         }
 
+        mapUnread.clear();
         for(ChatItem c:cList){
             if(uMap.containsKey(c.getFrom()) && c.getTo().equals("SELF") && !c.isRead()){
                 if(!mapUnread.containsKey(c.getFrom())){
@@ -260,26 +275,34 @@ public class ChatProfileActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadChatFromDB();
+        AppController.isAppRunning=true;
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        appController.attachListener1(new AppController.iNotify() {
-            @Override
-            public void onMessage(Bundle bundle) {
-                Log.d("ACTIVITY",bundle.getString("from"));
-                onMessageRecive(bundle);
-            }
-        });
-
-    }
 
     @Override
     public void onPause() {
         super.onPause();
-        appController.removeListener1();
+        AppController.isAppRunning=false;
     }
+
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//
+//        appController.attachListener1(new AppController.iNotify() {
+//            @Override
+//            public void onMessage(Bundle bundle) {
+//                Log.d("ACTIVITY",bundle.getString("from"));
+//                onMessageRecive(bundle);
+//            }
+//        });
+//
+//    }
+//
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//        appController.removeListener1();
+//    }
 
 }

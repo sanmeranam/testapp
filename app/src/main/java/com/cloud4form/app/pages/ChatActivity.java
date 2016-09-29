@@ -1,6 +1,10 @@
 package com.cloud4form.app.pages;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -81,6 +85,16 @@ public class ChatActivity extends AppCompatActivity {
         listView=(ListView)findViewById(R.id.listViewChatItems);
         adapter = new CustomListAdapter(this, chatItems);
         listView.setAdapter(adapter);
+
+
+        IntentFilter mStatusIntentFilter = new IntentFilter("BROADCAST_ACTION_MSG");
+        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
+                                                                     @Override
+                                                                     public void onReceive(Context context, Intent intent) {
+                                                                         onMessageRecive(intent.getBundleExtra("data"));
+                                                                     }
+                                                                 },
+                mStatusIntentFilter);
 
     }
 
@@ -243,25 +257,24 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        AppController.isAppRunning=true;
+    }
+
     @Override
     public void onStart() {
         super.onStart();
-
-        appController.attachListener2(new AppController.iNotify() {
-            @Override
-            public void onMessage(Bundle bundle) {
-                Log.d("ACTIVITY",bundle.getString("from"));
-                onMessageRecive(bundle);
-            }
-        });
-
         scrollMyListViewToBottom();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        appController.removeListener2();
+        AppController.isAppRunning=false;
 
         saveUpdatedToDb();
 

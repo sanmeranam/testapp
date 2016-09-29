@@ -15,7 +15,7 @@ import com.cloud4form.app.barcode.MyWebViewClient;
 import com.cloud4form.app.db.FormMeta;
 import com.cloud4form.app.db.IEntity;
 
-public class NewFormActivity extends AppCompatActivity {
+public class NewFormActivity extends AppCompatActivity{
 
     private WebView mWebView;
     private NewFormWebInterface newFormWebInterface;
@@ -23,6 +23,7 @@ public class NewFormActivity extends AppCompatActivity {
     private AppController appController;
     private FloatingActionButton fabSend;
     private String FORM_MODE= IEntity.ARG_MODE_NEW;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,11 +45,11 @@ public class NewFormActivity extends AppCompatActivity {
 
 
 
-        fabSend = (FloatingActionButton) findViewById(R.id.fab123);
+        fabSend = (FloatingActionButton) findViewById(R.id.fab1233);
         fabSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                requestToCollectData();
             }
         });
 
@@ -67,7 +68,16 @@ public class NewFormActivity extends AppCompatActivity {
         webSettings.setSaveFormData(true);
         webSettings.setEnableSmoothTransition(true);
 
-        this.newFormWebInterface =new NewFormWebInterface(this,mWebView);
+        mWebView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                return true;
+            }
+        });
+        mWebView.setLongClickable(false);
+        mWebView.setHapticFeedbackEnabled(false);
+
+        this.newFormWebInterface =new NewFormWebInterface(this,mWebView,formDetails,appController);
 
         mWebView.addJavascriptInterface(this.newFormWebInterface, "FC");
 
@@ -77,12 +87,14 @@ public class NewFormActivity extends AppCompatActivity {
             }
         });
 
-        mWebView.setWebViewClient(new MyWebViewClient(this));
+        mWebView.setWebViewClient(new MyWebViewClient(this,formDetails));
 
         try{
-            String sURL= appController.AppConfig.getString("app_url")+ appController.AppConfig.getString("form_new").replace("{1}",domain);
+            String sURL= appController.AppConfig.getString("app_url")+ appController.AppConfig.getString("form_new").replace("{domain}",domain);
 
             sURL+="?_f="+formDetails.getServerId()+"&_t="+token+"&_m="+FORM_MODE;
+
+            sURL="file:///android_asset/foreapp/index.html";
 
             mWebView.loadUrl(sURL);
         }catch (Exception e){
@@ -94,10 +106,18 @@ public class NewFormActivity extends AppCompatActivity {
         this.fabSend.setEnabled(bState);
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode==RESULT_OK) {
+        if(resultCode==RESULT_OK) {
+            data=data==null?new Intent():data;
             this.newFormWebInterface.onSuccessResultFromActivity(requestCode,data);
         }
     }
+
+
+    private void requestToCollectData(){
+        this.newFormWebInterface.collectDataToSend();
+    }
+
 }

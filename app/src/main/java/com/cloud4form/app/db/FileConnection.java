@@ -46,6 +46,16 @@ public class FileConnection {
         return new ArrayList();
     }
 
+    public boolean removeFileArray(Class className){
+        String file=className.getName().toLowerCase()+"_arr.obj";
+        return context.deleteFile(file);
+    }
+
+    public boolean removeFile(Class className){
+        String file=className.getName().toLowerCase()+"_ins.obj";
+        return context.deleteFile(file);
+    }
+
     private Object readFromFile(String Name){
         Object result=null;
         try{
@@ -70,6 +80,7 @@ public class FileConnection {
             ex.printStackTrace();
         }
     }
+
 
     private File getFilePath(){
         File storageDir = Environment.getExternalStorageDirectory();

@@ -10,6 +10,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.cloud4form.app.R;
 import com.cloud4form.app.AppController;
@@ -97,14 +98,19 @@ public class MyGcmListenerService extends GcmListenerService {
 
             if(ProcessMessage(data)){
 
-                if(AppController.doNotify(data)){//forward to activity as it is open
-                    try {
-                        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                        Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-                        r.play();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                Intent localIntent =new Intent("BROADCAST_ACTION_MSG")
+                        .putExtra("data",data);
+
+
+                if(AppController.isAppRunning){//.doNotify(data)){//forward to activity as it is open
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+//                    try {
+//                        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+//                        Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+//                        r.play();
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
 
 
 

@@ -146,8 +146,10 @@ public class AudioRecord extends AppCompatActivity {
     }
 
     private void stopPlaying() {
-        mPlayer.release();
-        mPlayer = null;
+        if(mPlayer!=null && mPlayer.isPlaying()) {
+            mPlayer.release();
+            mPlayer = null;
+        }
     }
 
     private void startRecording() {

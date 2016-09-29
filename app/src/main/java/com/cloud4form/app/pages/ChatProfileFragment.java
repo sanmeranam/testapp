@@ -1,10 +1,13 @@
 package com.cloud4form.app.pages;
 
 import android.app.Fragment;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -57,6 +60,17 @@ public class ChatProfileFragment extends Fragment {
 
         userList=loadUsersFromDB();
         cardViewAdapter=new CardViewAdapter(getActivity(),userList);
+
+
+
+        IntentFilter mStatusIntentFilter = new IntentFilter("BROADCAST_ACTION_MSG");
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(new BroadcastReceiver() {
+                                                                              @Override
+                                                                              public void onReceive(Context context, Intent intent) {
+                                                                                  onMessageRecive(intent.getBundleExtra("data"));
+                                                                              }
+                                                                          },
+                mStatusIntentFilter);
     }
 
     private ArrayList<User> loadUsersFromDB(){
@@ -217,22 +231,34 @@ public class ChatProfileFragment extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-
-        appController.attachListener1(new AppController.iNotify() {
-            @Override
-            public void onMessage(Bundle bundle) {
-                Log.d("ACTIVITY",bundle.getString("from"));
-                onMessageRecive(bundle);
-            }
-        });
+    public void onPause() {
+        super.onPause();
+        AppController.isAppRunning=false;
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-       appController.removeListener1();
+    public void onResume() {
+        super.onResume();
+        AppController.isAppRunning=true;
     }
+
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//
+//        appController.attachListener1(new AppController.iNotify() {
+//            @Override
+//            public void onMessage(Bundle bundle) {
+//                Log.d("ACTIVITY",bundle.getString("from"));
+//                onMessageRecive(bundle);
+//            }
+//        });
+//    }
+//
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//       appController.removeListener1();
+//    }
 
 }

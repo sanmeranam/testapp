@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.cloud4form.app.FormDetailsActivity;
+import com.cloud4form.app.FormListView;
 import com.cloud4form.app.NewFormActivity;
 import com.cloud4form.app.R;
 import com.cloud4form.app.AppController;
@@ -84,30 +85,32 @@ public class FormViewFragment extends Fragment {
                         }
 
                         boolean hasUpdate=false;
+                        formList.clear();
                         //Comparing with old list
                         for(int i=0;i<data.length();i++){
 
                             FormMeta fNew=new FormMeta(data.getJSONObject(i));
+                            formList.add(fNew);
                             //If already exist check version and update
-                            if(map.containsKey(fNew.getServerId())){
-                                FormMeta fOld=map.get(fNew.getServerId());
-
-                                if(fOld.getVersion()<fNew.getVersion()){
-                                    map.remove(fNew.getServerId());
-                                    map.put(fNew.getServerId(),fNew);
-                                    hasUpdate=true;
-                                }
-                            }else{//If not exist, just add it
-                                map.put(fNew.getServerId(),fNew);
+//                            if(map.containsKey(fNew.getServerId())){
+//                                FormMeta fOld=map.get(fNew.getServerId());
+//
+//                                if(fOld.getVersion()<fNew.getVersion()){
+//                                    map.remove(fNew.getServerId());
+//                                    map.put(fNew.getServerId(),fNew);
+//                                    hasUpdate=true;
+//                                }
+//                            }else{//If not exist, just add it
+//                                map.put(fNew.getServerId(),fNew);
                                 hasUpdate=true;
-                            }
+//                            }
                         }
 
-                        ArrayList<FormMeta> m=new ArrayList<FormMeta>(map.values());
-                        formList.clear();
-                        for(FormMeta mm:m){
-                            formList.add(mm);
-                        }
+//                        ArrayList<FormMeta> m=new ArrayList<FormMeta>(map.values());
+//                        formList.clear();
+//                        for(FormMeta mm:m){
+//                            formList.add(mm);
+//                        }
 
                         if(FormViewFragment.this.cardViewAdapter!=null)
                             FormViewFragment.this.cardViewAdapter.notifyDataSetChanged();
@@ -186,7 +189,7 @@ public class FormViewFragment extends Fragment {
             holder.btnDetails.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent newForm=new Intent(getActivity(), FormDetailsActivity.class);
+                    Intent newForm=new Intent(getActivity(), FormListView.class);
                     newForm.putExtra(IEntity.ARG_DATA,(FormMeta)v.getTag());
                     getActivity().startActivity(newForm);
                 }

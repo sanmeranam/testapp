@@ -71,10 +71,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- <activity -->
-        <!-- android:name=".HomeActivity" -->
-        <!-- android:label="@string/title_activity_home" -->
-        <!-- android:theme="@style/AppTheme.NoActionBar" /> -->
         <activity
             android:name=".LoginActivity"
             android:label="@string/title_activity_login" />
@@ -127,17 +123,53 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.cloud4form.app.HomeActivitySlider" />
         </activity>
-        <activity android:name=".pages.ChatActivity" android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:launchMode="singleTop"
+            android:name=".pages.ChatActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".pages.ChatProfileActivity"
             android:label="@string/title_activity_char_profile"
+            android:launchMode="singleTop"
             android:parentActivityName=".HomeActivitySlider"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.cloud4form.app.HomeActivitySlider" />
         </activity>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAH-JRTQd_DwIIwCpP4qjj5MRCfp7pOeRk" />
+
+        <activity
+            android:name=".FormListView"
+            android:label="@string/title_activity_form_list_view"
+            android:parentActivityName=".HomeActivitySlider"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.cloud4form.app.HomeActivitySlider" />
+        </activity>
+
+        <service
+            android:name=".other.FormUploadService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".other.SingleUploadService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <receiver
+            android:name=".other.BootUpReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

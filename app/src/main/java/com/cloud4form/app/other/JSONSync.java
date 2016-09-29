@@ -56,9 +56,6 @@ public class JSONSync {
     }
 
     public JSONObject getJsonPost(String surl,JSONObject data){
-        if(!AppController.isInternetAvailable()){
-            return null;
-        }
         try{
             URL url=new URL(surl);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();

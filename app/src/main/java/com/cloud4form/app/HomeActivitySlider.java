@@ -19,7 +19,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.cloud4form.app.db.FormData;
 import com.cloud4form.app.db.User;
+import com.cloud4form.app.other.FormUploadService;
 import com.cloud4form.app.other.JSONSync;
 import com.cloud4form.app.pages.AccountViewFragment;
 import com.cloud4form.app.pages.ChatProfileActivity;
@@ -76,6 +78,7 @@ public class HomeActivitySlider extends AppCompatActivity implements NavigationV
 
         switchFragment(FormViewFragment.newInstance());
         setTitle("Home");
+
     }
 
     @Override

@@ -1,7 +1,7 @@
 {
-  "api_url":"http://api.cloud4form.com",
-  "app_url":"http://app.cloud4form.com",
-  "tenant":"http://{domain}.cloud4form.com",
+  "api_url":"http://api.egform.com",
+  "app_url":"http://app.egform.com",
+  "tenant":"http://{domain}.egform.com",
   "sync_path":"/master/service/config/sync",
   "from_path":"/{domain}/service/config/forms",
   "signin_path":"/{domain}/service/config/singin",
@@ -11,5 +11,7 @@
   "getprofile":"/{domain}/service/config/getprofile",
   "setprofile":"/{domain}/service/config/setprofile",
   "getallusers":"/{domain}/service/config/getallusers",
-  "onmessage":"/{domain}/service/config/onmessage"
+  "onmessage":"/{domain}/service/config/onmessage",
+  "upload_url":"/{domain}/service/file/upload",
+  "create_form":"/{domain}/service/form/create"
 }
