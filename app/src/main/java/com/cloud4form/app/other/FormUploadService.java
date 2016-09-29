@@ -3,6 +3,7 @@ package com.cloud4form.app.other;
 import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
@@ -19,6 +20,9 @@ import net.gotev.uploadservice.UploadInfo;
 import net.gotev.uploadservice.UploadNotificationConfig;
 import net.gotev.uploadservice.UploadStatusDelegate;
 
+import org.json.JSONObject;
+
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -66,7 +70,7 @@ public class FormUploadService extends Service {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if(!SingleUploadService.isRunningService && AppController.isInternetAvailable()){
+                    if(!SingleUploadService.isRunningService){
                         ArrayList<FormData> dataQueue=controller.Filo.readArray(FormData.class);
                         if(dataQueue.size()>0){
                             for(FormData formData:dataQueue){

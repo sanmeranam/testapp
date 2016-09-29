@@ -2,6 +2,7 @@ package com.cloud4form.app;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Point;
@@ -15,6 +16,7 @@ import android.view.WindowManager;
 
 import com.cloud4form.app.db.FileConnection;
 import com.cloud4form.app.db.User;
+import com.cloud4form.app.other.FormUploadService;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 

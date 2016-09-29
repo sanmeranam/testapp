@@ -3,6 +3,8 @@ package com.cloud4form.app;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,6 +28,7 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -292,6 +295,7 @@ public class NewFormWebInterface {
                 triggerCallback(req.callback,req.reqId+"",intent.getStringExtra("data"));
                 break;
             case PHOTO:
+                scaleImage(1024,820,req.data);
                 triggerCallback(req.callback,req.reqId+"",req.data);
                 break;
             case VIDEO:
@@ -310,6 +314,36 @@ public class NewFormWebInterface {
             default:
         }
     }
+
+
+    private void scaleImage(int targetW,int targetH,String sPath) {
+
+        // Get the dimensions of the bitmap
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(sPath, bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        // Determine how much to scale down the image
+        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+
+        // Decode the image file into a Bitmap sized to fill the View
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(sPath, bmOptions);
+        try{
+            FileOutputStream out = new FileOutputStream(sPath);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            out.flush();
+            out.close();
+        }catch (Exception ex){
+
+        }
+    }
+
 
     public void collectDataToSend() {
         triggerCallback("window.Device.gotRequestForDataCollection","");

@@ -124,7 +124,7 @@ public class SingleUploadService extends Service {
         int index=-1;
         for(int i=0;i<list.size();i++){
             FormData fd=list.get(i);
-            if(fd.getServerId().equals(formData.getServerId())){
+            if(fd.getInternalId().equals(formData.getInternalId())){
                 index=i;
                 break;
             }
@@ -200,7 +200,7 @@ public class SingleUploadService extends Service {
 
             formData.SentStatus= FormData.SENT_STATUS.SENDING;
 
-            dataToSend.put("temp_id",formData.getServerId());
+            dataToSend.put("internal_id",formData.getInternalId());
             dataToSend.put("meta_id",formData.getMetaId());
             dataToSend.put("create_date",formData.getCreateDate());
             dataToSend.put("version",formData.getVersion());
@@ -241,7 +241,7 @@ public class SingleUploadService extends Service {
     }
 
     synchronized private boolean fileUpload(final FormData.FieldEntity data,FormData formData){
-        String params="?field_id="+data.fieldId+"&field_type="+data.type+"&temp_form_id="+formData.getServerId();
+        String params="?field_id="+data.fieldId+"&field_type="+data.type+"&temp_form_id="+formData.getInternalId();
         String url=controller.generateURL("api_url","upload_url")+params;
         try {
             MultipartUploadRequest mpreq = new MultipartUploadRequest(this, url);

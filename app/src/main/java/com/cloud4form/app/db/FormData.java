@@ -14,6 +14,7 @@ public class FormData extends Entity {
     public static enum FIELD_TYPE{audio_record,video_record,sign_input,file_attach,photo_attach};
     public static enum SENT_STATUS{NEW,SENDING,SENT,ERROR};
     private String serverId;
+    private String internalId;
     private String metaId;
     private Date createDate;
     private int version;
@@ -21,7 +22,8 @@ public class FormData extends Entity {
     private HashMap<String,FieldEntity> data=new HashMap<>();
 
     public FormData(JSONObject object,int version,String mdetaId){
-        this.serverId="id:"+Math.round(Math.random()*99999);
+        this.internalId="id:"+Math.round(Math.random()*99999);
+        this.serverId="";
         try{
             this.metaId=mdetaId;
             this.createDate=new Date();
@@ -40,6 +42,14 @@ public class FormData extends Entity {
         }catch (Exception ex){
             ex.printStackTrace();
         }
+    }
+
+    public String getInternalId() {
+        return internalId;
+    }
+
+    public void setInternalId(String internalId) {
+        this.internalId = internalId;
     }
 
     public String getServerId() {

@@ -79,6 +79,11 @@ public class HomeActivitySlider extends AppCompatActivity implements NavigationV
         switchFragment(FormViewFragment.newInstance());
         setTitle("Home");
 
+
+
+        Intent myIntent = new Intent(this, FormUploadService.class);
+        this.startService(myIntent);
+
     }
 
     @Override
