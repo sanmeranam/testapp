@@ -120,6 +120,16 @@
                 android:id="@+id/textView9"
                 android:textAppearance="@style/TextAppearance.AppCompat" />
 
+            <Button
+                android:text="Open"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txtFormName"
+                android:layout_alignRight="@+id/txtFormDate"
+                android:layout_alignEnd="@+id/txtFormDate"
+                android:id="@+id/buttonOpen"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored" />
+
 
         </RelativeLayout>
 

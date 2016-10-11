@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private void getAppConfig(String scanId) {
         this._mProg.setVisibility(View.VISIBLE);
-        this._mScanButton.setVisibility(View.INVISIBLE);
+        this._mScanButton.setVisibility(View.GONE);
         this._mTextView.setText("Sync in progress. Please wait...");
 
 

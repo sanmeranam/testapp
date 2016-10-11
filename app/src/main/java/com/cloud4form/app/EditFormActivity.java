@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,7 +18,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 import com.cloud4form.app.barcode.MyWebViewClient;
-import com.cloud4form.app.db.FormMeta;
+import com.cloud4form.app.db.FormData;
 import com.cloud4form.app.db.IEntity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -28,12 +27,12 @@ import com.google.android.gms.location.LocationServices;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class NewFormActivity extends AppCompatActivity implements
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
-
+public class EditFormActivity  extends AppCompatActivity implements
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private WebView mWebView;
-    private NewFormWebInterface newFormWebInterface;
-    private FormMeta formDetails;
+    private EditFormWebInterface editFormWebInterface;
+
+    private FormData formData;
     private AppController appController;
     private String FORM_MODE= IEntity.ARG_MODE_NEW;
 
@@ -47,9 +46,9 @@ public class NewFormActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_web_view);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
-        formDetails=(FormMeta) getIntent().getSerializableExtra(IEntity.ARG_DATA);
+        formData=(FormData) getIntent().getSerializableExtra(IEntity.ARG_DATA);
 
-        toolbar.setTitle(formDetails.getName().toUpperCase());
+        toolbar.setTitle(formData.getFormName().toUpperCase());
         setSupportActionBar(toolbar);
 
         FORM_MODE=getIntent().getStringExtra(IEntity.ARG_MODE);
@@ -84,9 +83,9 @@ public class NewFormActivity extends AppCompatActivity implements
         mWebView.setLongClickable(false);
         mWebView.setHapticFeedbackEnabled(false);
 
-        this.newFormWebInterface =new NewFormWebInterface(this,mWebView,formDetails,appController);
+        this.editFormWebInterface =new EditFormWebInterface(this,mWebView,formData,appController);
 
-        mWebView.addJavascriptInterface(this.newFormWebInterface, "FC");
+        mWebView.addJavascriptInterface(this.editFormWebInterface, "FC");
 
         mWebView.setWebChromeClient(new WebChromeClient() {
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
@@ -97,12 +96,7 @@ public class NewFormActivity extends AppCompatActivity implements
         mWebView.setWebViewClient(new MyWebViewClient(this));
 
         try{
-//            String sURL= appController.AppConfig.getString("app_url")+ appController.AppConfig.getString("form_new").replace("{domain}",domain);
-//
-//            sURL+="?_f="+formDetails.getServerId()+"&_t="+token+"&_m="+FORM_MODE;
-
-            String sURL="file:///android_asset/foreapp/index.html";
-
+            String sURL="file:///android_asset/foreapp/index2.html";
             mWebView.loadUrl(sURL);
         }catch (Exception e){
             e.printStackTrace();
@@ -115,23 +109,20 @@ public class NewFormActivity extends AppCompatActivity implements
                 .addApi(LocationServices.API).build();
     }
 
-
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode==RESULT_OK) {
             data=data==null?new Intent():data;
-            this.newFormWebInterface.onSuccessResultFromActivity(requestCode,data);
+            this.editFormWebInterface.onSuccessResultFromActivity(requestCode,data);
         }
     }
 
     private String[] getCreateActions(){
-     String[] as=new String[]{"Submit"};
+        String[] as=new String[]{"Submit"};
         try{
-            JSONObject arr=this.formDetails.getFlow();
-            JSONObject create=arr.getJSONObject("1");
-            if(create!=null){
-                JSONArray act=create.getJSONArray("_a");
+            JSONObject cStageAction=this.formData.getNextStage();
+            if(cStageAction!=null){
+                JSONArray act=cStageAction.getJSONArray("_a");
                 as=new String[act.length()];
                 for(int i=0;i<as.length;i++){
                     as[i]=act.getJSONObject(i).getString("n");
@@ -173,7 +164,7 @@ public class NewFormActivity extends AppCompatActivity implements
     }
 
     private void requestToCollectData(int id,String action){
-        this.newFormWebInterface.collectDataToSend(id,action,"CREATE","111");
+        this.editFormWebInterface.collectDataToSend(id,action,"CREATE","111");
     }
 
     @Override

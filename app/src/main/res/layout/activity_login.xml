@@ -21,9 +21,9 @@
         android:layout_gravity="center_horizontal">
 
         <ImageView
-            android:layout_width="200dp"
+            android:layout_width="100dp"
             android:layout_height="match_parent"
-            android:src="@drawable/logo_vector"
+            android:src="@drawable/f_logo_fav"
             android:id="@+id/imageView" />
     </LinearLayout>
 

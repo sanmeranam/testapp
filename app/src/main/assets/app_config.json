@@ -13,5 +13,6 @@
   "getallusers":"/{domain}/service/config/getallusers",
   "onmessage":"/{domain}/service/config/onmessage",
   "upload_url":"/{domain}/service/file/upload",
-  "create_form":"/{domain}/service/form/create"
+  "create_form":"/{domain}/service/form/create",
+  "inbox_form":"/{domain}/service/form/inbox"
 }

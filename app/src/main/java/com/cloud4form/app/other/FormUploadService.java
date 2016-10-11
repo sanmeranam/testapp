@@ -70,7 +70,7 @@ public class FormUploadService extends Service {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if(!SingleUploadService.isRunningService){
+                    if(!SingleUploadService.isRunningService && AppController.isInternetAvailable()){
                         ArrayList<FormData> dataQueue=controller.Filo.readArray(FormData.class);
                         if(dataQueue.size()>0){
                             for(FormData formData:dataQueue){

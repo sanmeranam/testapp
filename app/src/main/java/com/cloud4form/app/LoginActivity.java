@@ -217,6 +217,10 @@ public class LoginActivity extends AppCompatActivity{
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        this.finish();
+    }
 
     private void AuthSuccess(){
         Intent intent = new Intent(this, HomeActivitySlider.class);

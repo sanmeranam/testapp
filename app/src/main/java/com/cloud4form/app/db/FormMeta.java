@@ -2,6 +2,7 @@ package com.cloud4form.app.db;
 
 import com.itextpdf.text.pdf.PdfName;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -12,6 +13,7 @@ public class FormMeta extends Entity {
     private String name;
     private int version;
     private String model;
+    private String flow;
 
 
     public FormMeta(JSONObject obj){
@@ -24,9 +26,26 @@ public class FormMeta extends Entity {
                 this.model=obj.getJSONObject("model_view").toString();
             }
 
+            if(obj.has("flow")){
+                this.flow=obj.getJSONObject("flow").toString();
+            }
+
         }catch (Exception ex){
 
         }
+    }
+
+    public JSONObject getFlow() {
+        JSONObject data=null;
+        try{
+            data=new JSONObject(this.flow);
+        }catch (Exception ex){
+        }
+        return data;
+    }
+
+    public void setFlow(JSONArray flow) {
+        this.flow = flow.toString();
     }
 
     public String getServerId() {

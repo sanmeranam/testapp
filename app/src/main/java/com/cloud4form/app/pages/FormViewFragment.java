@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.cloud4form.app.FormDetailsActivity;
 import com.cloud4form.app.FormListView;
 import com.cloud4form.app.NewFormActivity;
 import com.cloud4form.app.R;
@@ -77,47 +77,15 @@ public class FormViewFragment extends Fragment {
                 public void onResult(JSONObject result) throws Exception {
                     if(result!=null && result.has("success") && result.getInt("success")==1){
                         JSONArray data=result.getJSONArray("data");
-
-                        HashMap<String,FormMeta> map=new HashMap<String, FormMeta>();
-                        //Creating map of exist forms
-                        for(FormMeta f:formList){
-                            map.put(f.getServerId(),f);
-                        }
-
-                        boolean hasUpdate=false;
                         formList.clear();
-                        //Comparing with old list
                         for(int i=0;i<data.length();i++){
-
                             FormMeta fNew=new FormMeta(data.getJSONObject(i));
                             formList.add(fNew);
-                            //If already exist check version and update
-//                            if(map.containsKey(fNew.getServerId())){
-//                                FormMeta fOld=map.get(fNew.getServerId());
-//
-//                                if(fOld.getVersion()<fNew.getVersion()){
-//                                    map.remove(fNew.getServerId());
-//                                    map.put(fNew.getServerId(),fNew);
-//                                    hasUpdate=true;
-//                                }
-//                            }else{//If not exist, just add it
-//                                map.put(fNew.getServerId(),fNew);
-                                hasUpdate=true;
-//                            }
                         }
-
-//                        ArrayList<FormMeta> m=new ArrayList<FormMeta>(map.values());
-//                        formList.clear();
-//                        for(FormMeta mm:m){
-//                            formList.add(mm);
-//                        }
-
                         if(FormViewFragment.this.cardViewAdapter!=null)
                             FormViewFragment.this.cardViewAdapter.notifyDataSetChanged();
 
-                        if(hasUpdate){
-                            InsertOrUpdate();
-                        }
+                        InsertOrUpdate();
                     }
                 }
             }).execute(dataToSend);
@@ -173,7 +141,8 @@ public class FormViewFragment extends Fragment {
             holder.version.setText("v"+entity.getVersion());
             holder.count.setText("0");
 
-            holder.btnDetails.setTag(entity);
+            holder.btnSent.setTag(entity);
+            holder.btnInobx.setTag(entity);
             holder.btnCreate.setTag(entity);
 
             holder.btnCreate.setOnClickListener(new View.OnClickListener() {
@@ -186,11 +155,22 @@ public class FormViewFragment extends Fragment {
                     getActivity().startActivity(newForm);
                 }
             });
-            holder.btnDetails.setOnClickListener(new View.OnClickListener() {
+            holder.btnSent.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent newForm=new Intent(getActivity(), FormListView.class);
                     newForm.putExtra(IEntity.ARG_DATA,(FormMeta)v.getTag());
+                    newForm.putExtra("page",0);
+                    getActivity().startActivity(newForm);
+                }
+            });
+
+            holder.btnInobx.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent newForm=new Intent(getActivity(), FormListView.class);
+                    newForm.putExtra(IEntity.ARG_DATA,(FormMeta)v.getTag());
+                    newForm.putExtra("page",1);
                     getActivity().startActivity(newForm);
                 }
             });
@@ -205,16 +185,18 @@ public class FormViewFragment extends Fragment {
             public TextView title;
             public TextView version;
             public TextView count;
-            public Button btnCreate;
-            public Button btnDetails;
+            public FloatingActionButton btnCreate;
+            public Button btnInobx;
+            public Button btnSent;
 
             public MyViewHolder(View view) {
                 super(view);
                 title = (TextView) view.findViewById(R.id.textFormName);
                 version = (TextView) view.findViewById(R.id.textFormVersion);
                 count = (TextView) view.findViewById(R.id.textFormCount);
-                btnCreate = (Button) view.findViewById(R.id.buttonCreate);
-                btnDetails = (Button) view.findViewById(R.id.buttonDetails);
+                btnCreate = (FloatingActionButton) view.findViewById(R.id.floatingActionCreate);
+                btnInobx = (Button) view.findViewById(R.id.buttonInbox);
+                btnSent = (Button) view.findViewById(R.id.buttonSent);
             }
         }
     }

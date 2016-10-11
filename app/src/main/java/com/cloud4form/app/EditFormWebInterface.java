@@ -5,12 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebView;
@@ -32,15 +30,15 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Created by I326482 on 8/14/2016.
  */
-public class NewFormWebInterface {
+public class EditFormWebInterface {
     private Context mContext;
     private WebView _mCView;
     private int baseReqId=1000;
@@ -49,10 +47,10 @@ public class NewFormWebInterface {
 
     private enum PTYPE{PHOTO,FILE_SCAN,VIDEO,AUDIO,BARCODE,GEO,COMPASS,SIGN};
     private HashMap<Integer,ReqPacket> reqMap=new HashMap<>();
-    private FormMeta mCurrentForm;
+    private FormData mCurrentForm;
 
     /** Instantiate the interface and set the context */
-    NewFormWebInterface(Context c, WebView _mCView,FormMeta mCurrentForm,AppController controller) {
+    EditFormWebInterface(Context c, WebView _mCView, FormData mCurrentForm, AppController controller) {
         mContext = c;
         this._mCView=_mCView;
         this.mCurrentForm=mCurrentForm;
@@ -65,9 +63,17 @@ public class NewFormWebInterface {
         try{
             JSONObject obj=new JSONObject();
             obj.put("id",this.mCurrentForm.getServerId());
-            obj.put("name",this.mCurrentForm.getName());
+            obj.put("name",this.mCurrentForm.getFormName());
             obj.put("version",this.mCurrentForm.getVersion());
             obj.put("model_view",this.mCurrentForm.getModel());
+
+            Set<String> sKeys=this.mCurrentForm.getFields().keySet();
+            JSONObject ddr=new JSONObject();
+
+            for(String key:sKeys){
+                ddr.put(key,this.mCurrentForm.getFields().get(key).value);
+            }
+            obj.put("data",ddr);
             data=obj.toString();
         }catch (Exception ex){
         }
@@ -83,18 +89,18 @@ public class NewFormWebInterface {
 
     @JavascriptInterface
     public void getLocation(int reqId,String callback) {
-        this.reqMap.put(reqId,new ReqPacket(reqId,PTYPE.GEO,callback));
+        this.reqMap.put(reqId,new ReqPacket(reqId, PTYPE.GEO,callback));
     }
 
     @JavascriptInterface
     public void getCompass(int reqId,String callback) {
-        this.reqMap.put(reqId,new ReqPacket(reqId,PTYPE.COMPASS,callback));
+        this.reqMap.put(reqId,new ReqPacket(reqId, PTYPE.COMPASS,callback));
     }
 
 
     @JavascriptInterface
     public void capturePhoto(int reqId,String callback) {
-        ReqPacket reqPack=new ReqPacket(reqId,PTYPE.PHOTO,callback);
+        ReqPacket reqPack=new ReqPacket(reqId, PTYPE.PHOTO,callback);
 
         this.reqMap.put(reqId,reqPack);
 
@@ -117,7 +123,7 @@ public class NewFormWebInterface {
 
     @JavascriptInterface
     public void captureVideo(int reqId,int duration,String callback) {
-        ReqPacket reqPack=new ReqPacket(reqId,PTYPE.VIDEO,callback);
+        ReqPacket reqPack=new ReqPacket(reqId, PTYPE.VIDEO,callback);
 
         this.reqMap.put(reqId,reqPack);
 
@@ -139,7 +145,7 @@ public class NewFormWebInterface {
 
     @JavascriptInterface
     public void captureSign(int reqId,String callback) {
-        this.reqMap.put(reqId,new ReqPacket(reqId,PTYPE.SIGN,callback));
+        this.reqMap.put(reqId,new ReqPacket(reqId, PTYPE.SIGN,callback));
         Intent intent = new Intent(this.mContext, SingCaptureActivity.class);
         ((Activity)this.mContext).startActivityForResult(intent, reqId);
 
@@ -147,14 +153,14 @@ public class NewFormWebInterface {
 
     @JavascriptInterface
     public void scanFile(int reqId,String callback) {
-        this.reqMap.put(reqId,new ReqPacket(reqId,PTYPE.FILE_SCAN,callback));
+        this.reqMap.put(reqId,new ReqPacket(reqId, PTYPE.FILE_SCAN,callback));
         Intent intent = new Intent(this.mContext, ScannerHomeActivity.class);
         ((Activity)this.mContext).startActivityForResult(intent, reqId);
     }
 
     @JavascriptInterface
     public void scanBarcode(int reqId,String callback) {
-        this.reqMap.put(reqId,new ReqPacket(reqId,PTYPE.BARCODE,callback));
+        this.reqMap.put(reqId,new ReqPacket(reqId, PTYPE.BARCODE,callback));
 
         Intent intent = new Intent(this.mContext, SimpleScannerActivity.class);
         ((Activity)this.mContext).startActivityForResult(intent, reqId);
@@ -162,7 +168,7 @@ public class NewFormWebInterface {
 
     @JavascriptInterface
     public void captureAudio(int reqId,int duration,String callback) {
-        this.reqMap.put(reqId,new ReqPacket(reqId,PTYPE.AUDIO,callback));
+        this.reqMap.put(reqId,new ReqPacket(reqId, PTYPE.AUDIO,callback));
         Intent intent = new Intent(this.mContext, AudioRecord.class);
         intent.putExtra(AudioRecord.DURATION,duration);
         ((Activity)this.mContext).startActivityForResult(intent, reqId);
@@ -170,7 +176,7 @@ public class NewFormWebInterface {
 
     @JavascriptInterface
     public void captureGPS(int reqId,String callback) {
-        this.reqMap.put(reqId,new ReqPacket(reqId,PTYPE.GEO,callback));
+        this.reqMap.put(reqId,new ReqPacket(reqId, PTYPE.GEO,callback));
         PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
         try {
             ((Activity) this.mContext).startActivityForResult(builder.build(((Activity) this.mContext)), reqId);
@@ -189,7 +195,7 @@ public class NewFormWebInterface {
             JSONObject jData=new JSONObject(data);
             FormData formData=new FormData(jData,version,formId);
             formData.setModel(this.mCurrentForm.getModel());
-            formData.setFormName(mCurrentForm.getName());
+            formData.setFormName(mCurrentForm.getFormName());
 
 
 
@@ -299,7 +305,7 @@ public class NewFormWebInterface {
     @JavascriptInterface
     public void showImage(String path) {
         Intent intent = new Intent();
-        intent.setAction(android.content.Intent.ACTION_VIEW);
+        intent.setAction(Intent.ACTION_VIEW);
         File file = new File(path);
         intent.setDataAndType(Uri.fromFile(file), "image/*");
         ((Activity)this.mContext).startActivity(intent);
@@ -310,7 +316,7 @@ public class NewFormWebInterface {
     public void openMap(String lat,String lng) {
         String addr=lat+","+lng;
 
-        Intent intent = new Intent(android.content.Intent.ACTION_VIEW,Uri.parse("http://maps.google.com/maps?q="+ lat  +"," + lng +"(Location)&iwloc=A&hl=es"));
+        Intent intent = new Intent(Intent.ACTION_VIEW,Uri.parse("http://maps.google.com/maps?q="+ lat  +"," + lng +"(Location)&iwloc=A&hl=es"));
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         ((Activity)this.mContext).startActivity(intent);
     }
